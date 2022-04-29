@@ -1,10 +1,5 @@
 from telegram.ext import *
-
-def test_response(input_text):
-    user_message = str(input_text).lower()
-
-    if user_message == 'hi':
-        return 'im here to help with Linux and chew bubblegum'
+import responses as R
 
 print("The bot is starting")
 
@@ -13,7 +8,7 @@ def start_command(update, context):
 
 def handle_message(update, context):
     text = str(update.message.text).lower()
-    response = test_response(text)
+    response = R.test_response(text)
 
     update.message.reply_text(response)
 
