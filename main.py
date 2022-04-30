@@ -1,31 +1,56 @@
-from telegram.ext import *
-import responses as R
+import subprocess
+import telebot
+from telebot import types
 
-print("The bot is starting")
+with open('/home/labbrat/bot_api.txt', 'r') as f:
+    bot_api = f.read()
+bot = telebot.TeleBot(bot_api.strip('\n'))
 
-def start_command(update, context):
-    return update.message.reply_text("Pebbles at your service!")
+name = ''
+surname = ''
+age = 0
+@bot.message_handler(content_types=['text'])
+def start(message):
+    if message.text == '/uptime':
+        bot.send_message(message.from_user.id, 'enter IP address <IP:port>')
+        bot.register_next_step_handler(message, get_ip)
+    else:
+        bot.send_message(message.from_user.id, 'type /uptime')
 
-def handle_message(update, context):
-    text = str(update.message.text).lower()
-    response = R.test_response(text)
+def get_ip(message):
+    global ip
+    ip = message.text
+    bot.send_message(message.from_user.id, 'enter password')
+    bot.register_next_step_handler(message, get_pass)
 
-    update.message.reply_text(response)
+def get_pass(message):
+    global paswd
+    paswd = message.text
+    bot.send_message(message.from_user.id, 'enter username')
+    bot.register_next_step_handler(message, get_uname)
 
-def main(api_key):
-    updater = Updater(api_key, use_context=True)
-    dp = updater.dispatcher
+def get_uname(message):
+    global uname
+    uname = message.text
 
-    dp.add_handler(CommandHandler("start", start_command))
-    dp.add_handler(MessageHandler(Filters.text, handle_message))
-
-    updater.start_polling()
-    updater.idle()
-
-
-with open('/home/labbrat/bot_api.txt') as f:
-    api_key = f.read().rstrip('\n')
-# print(api_key)
-main(api_key)
+    keyboard = types.InlineKeyboardMarkup()
+    key_yes = types.InlineKeyboardButton(text='yes', callback_data='yes')
+    keyboard.add(key_yes)
+    key_no= types.InlineKeyboardButton(text='no', callback_data='no')
+    keyboard.add(key_no)
+    question = f"logging in machine {ip} with user {uname}, correct?"
+    bot.send_message(message.from_user.id, text=question, reply_markup=keyboard)
 
 
+@bot.callback_query_handler(func=lambda call: True)
+def callback_worker(call):
+    if call.data == "yes":
+        ansible_cmd = ['ansible', 'all', '-i', ip, '--extra-vars',
+                      f'ansible_user={uname} ansible_password={paswd}', '-a' 'uptime']
+        ram = subprocess.check_output(ansible_cmd).decode('ascii')
+        bot.send_message(call.message.chat.id, ram)
+    elif call.data == "no":
+        bot.send_message(call.message.chat.id, 'call /ram again please')
+
+
+bot.polling(none_stop=True, interval=0)
