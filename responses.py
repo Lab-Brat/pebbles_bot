@@ -7,5 +7,6 @@ def test_response(input_text):
         return 'im here to help with Linux and chew bubblegum'
 
     if user_message == 'ram':
-        return subprocess.check_output("free")
+        ram = subprocess.check_output(['free', '-h'])
+        return ram.decode('ascii')
 
