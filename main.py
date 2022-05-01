@@ -2,20 +2,30 @@ import subprocess
 import telebot
 from telebot import types
 
-with open('/home/boink/bot_api.txt', 'r') as f:
+with open('/home/labbrat/bot_api.txt', 'r') as f:
     bot_api = f.read()
 bot = telebot.TeleBot(bot_api.strip('\n'))
+
+@bot.message_handler(commands=['start'])
+def start(message):
+	bot.reply_to(message, "Pebbles, at your service! Please type /help for help")
+
+@bot.message_handler(commands=['help'])
+def help(message):
+    l0 = "Commands that Pebbles know:\n"
+    c1 = "/start -----------> display start message\n"
+    c2 = "/help ------------> display help message\n"
+    c3 = "/send_cmd ---> send a command to a Linux host"
+    help_message = f"{l0}{c1}{c2}{c3}"
+    bot.reply_to(message, help_message)
 
 @bot.message_handler(content_types=['text'])
 def start(message):
     if message.text == '/send_cmd':
-        bot.send_message(message.from_user.id, 'enter IP address <IP:port>')
+        bot.send_message(message.from_user.id, 'enter IP address <IP>:<port>')
         bot.register_next_step_handler(message, get_ip)
     else:
         bot.send_message(message.from_user.id, 'I only know /send_cmd for now')
-
-def help(message):
-    pass
 
 def get_ip(message):
     global ip
