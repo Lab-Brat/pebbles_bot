@@ -3,7 +3,9 @@ import telebot
 from telebot import types
 from datetime import datetime as dt
 
-with open('/home/labbrat/bot_api.txt', 'r') as f:
+linux_user = subprocess.getoutput("echo $USER")
+
+with open(f"/home/{linux_user}/bot_api.txt", 'r') as f:
     bot_api = f.read()
 bot = telebot.TeleBot(bot_api.strip('\n'))
 
