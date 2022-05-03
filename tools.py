@@ -14,6 +14,8 @@ class Tools():
             return 'pass'
         except paramiko.ssh_exception.NoValidConnectionsError:
             return 'port'
+        except TimeoutError:
+            return 'time'
 
     def ssh_disconnect(self):
         self.client.close()

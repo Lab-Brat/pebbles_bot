@@ -95,9 +95,11 @@ def callback_worker(call):
         if con_result == True:
             bot.send_message(call.message.chat.id, 'Login Success')
         elif con_result == 'pass':
-            bot.send_message(call.message.chat.id, 'Login Failed: Wrong Password')
+            bot.send_message(call.message.chat.id, 'Login Failed, Wrong Password')
         elif con_result == 'port':
-            bot.send_message(call.message.chat.id, 'Login Failed: Wrong Port')
+            bot.send_message(call.message.chat.id, 'Login Failed, Wrong Port')
+        elif con_result == 'time':
+            bot.send_message(call.message.chat.id, 'Login Failed, Connection Timed Out')
         print(f'[user pressed YES on the keyboard at {dt.now()}]')
     elif call.data == "no":
         bot.send_message(call.message.chat.id, 'To start over enter /login again')
