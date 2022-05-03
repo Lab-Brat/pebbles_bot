@@ -19,12 +19,12 @@ def start(message):
 
 @bot.message_handler(commands=['help'])
 def help(message):
-    l0 = "Commands that Pebbles know:\n"
-    c1 = "/start -----------> display start message\n"
-    c2 = "/help ------------> display help message\n"
-    c3 = "/login ---> send a command to a Linux host\n"
-    c4 = "/logout ---> terminate ssh session\n"
-    c5 = "/run ----------------> run a linux command"
+    l0 = "Commands that Pebbles knows:\n"
+    c1 = "/start -------> display start message\n"
+    c2 = "/help --------> display help message\n"
+    c3 = "/login -------> send a command to a Linux host\n"
+    c4 = "/logout -----> terminate ssh session\n"
+    c5 = "/run ---------> run a linux command"
     help_message = f"{l0}{c1}{c2}{c3}{c4}{c5}"
     bot.reply_to(message, help_message)
     print(f'[{message.from_user.id} called /help method at {dt.now()}]')
@@ -32,33 +32,34 @@ def help(message):
 @bot.message_handler(commands=['logout'])
 def logout(message):
     tt.ssh_disconnect()
-    bot.send_message(message.from_user.id, 'session terminated')
+    bot.send_message(message.from_user.id, 'Session Terminated')
 
 @bot.message_handler(content_types=['text'])
 def start(message):
     if message.text == '/login':
-        bot.send_message(message.from_user.id, 'enter IP address <IP>:<port>')
+        entip = 'Enter **IP address**, format ---> IP:port'
+        bot.send_message(message.from_user.id, entip, parse_mode='markdown')
         bot.register_next_step_handler(message, get_ip)
         print(f'[{message.from_user.id} called get_ip method at {dt.now()}]')
     elif message.text == '/run':
-        bot.reply_to(message, "Please enter something: ")
+        bot.reply_to(message, "Enter command to run: ")
         bot.register_next_step_handler(message, run)
     else:
-        bot.send_message(message.from_user.id, 'I only know /login for now')
+        bot.send_message(message.from_user.id, 'Please run /help for help')
 
 def get_ip(message):
     global ip
     ip = message.text.split(':')
-    bot.send_message(message.from_user.id, 'enter username')
+    bot.send_message(message.from_user.id, 'Enter **username**', parse_mode='markdown')
     bot.register_next_step_handler(message, get_uname)
-    print(f'[{message.from_user.id} called get_pass method at {dt.now()}]')
+    print(f'[{message.from_user.id} called get_uname method at {dt.now()}]')
 
 def get_uname(message):
     global uname
     uname = message.text
-    bot.send_message(message.from_user.id, 'enter password')
+    bot.send_message(message.from_user.id, 'Enter **password**', parse_mode='markdown')
     bot.register_next_step_handler(message, get_pass)
-    print(f'[{message.from_user.id} called get_cmd method at {dt.now()}]')
+    print(f'[{message.from_user.id} called get_pass method at {dt.now()}]')
 
 def get_pass(message):
     global paswd
@@ -87,7 +88,7 @@ def run(message):
 def callback_worker(call):
     if call.data == "yes":
         tt.ssh_connect(ip[0], ip[1], uname, paswd)
-        bot.send_message(call.message.chat.id, 'login success')
+        bot.send_message(call.message.chat.id, 'Login Success')
         print(f'[user pressed YES on the keyboard at {dt.now()}]')
     elif call.data == "no":
         bot.send_message(call.message.chat.id, 'call /login again please')
