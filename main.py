@@ -79,19 +79,28 @@ def get_pass(message):
 def run(message):
     global cmd
     cmd = message.text
-    cout = tt.ssh_cmd(cmd)
-    bot.send_message(message.from_user.id, cout)
+    try:
+        cout = tt.ssh_cmd(cmd)
+        bot.send_message(message.from_user.id, cout)
+    except AttributeError:
+        err_msg = 'There is no active SSH session'
+        bot.send_message(message.from_user.id, err_msg)
     print(f'[{message.from_user.id} called /run method at {dt.now()}]')
 
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_worker(call):
     if call.data == "yes":
-        tt.ssh_connect(ip[0], ip[1], uname, paswd)
-        bot.send_message(call.message.chat.id, 'Login Success')
+        con_result = tt.ssh_connect(ip[0], ip[1], uname, paswd)
+        if con_result == True:
+            bot.send_message(call.message.chat.id, 'Login Success')
+        elif con_result == 'pass':
+            bot.send_message(call.message.chat.id, 'Login Failed: Wrong Password')
+        elif con_result == 'port':
+            bot.send_message(call.message.chat.id, 'Login Failed: Wrong Port')
         print(f'[user pressed YES on the keyboard at {dt.now()}]')
     elif call.data == "no":
-        bot.send_message(call.message.chat.id, 'call /login again please')
+        bot.send_message(call.message.chat.id, 'To start over enter /login again')
         print(f'[user pressed NO on the keyboard] at {dt.now()}]')
 
 

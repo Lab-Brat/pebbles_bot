@@ -6,7 +6,14 @@ class Tools():
         self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
     def ssh_connect(self, host, port, uname, pwd):
-        self.client.connect(host, port=port, username=uname, password=pwd)
+        # self.client.connect(host, port=port, username=uname, password=pwd)
+        try:
+            self.client.connect(host, port=port, username=uname, password=pwd)
+            return True
+        except paramiko.ssh_exception.AuthenticationException:
+            return 'pass'
+        except paramiko.ssh_exception.NoValidConnectionsError:
+            return 'port'
 
     def ssh_disconnect(self):
         self.client.close()
