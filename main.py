@@ -84,8 +84,16 @@ def run(message):
     global cmd
     cmd = message.text
     try:
-        cout = tt.ssh_cmd(cmd)
-        bot.send_message(message.from_user.id, cout)
+        cout, err = tt.ssh_cmd(cmd)
+        if cout != '' and err != '':
+            bot.send_message(message.from_user.id, f'Command output: \n{cout}\n')
+            bot.send_message(message.from_user.id, f'Command output: \n{err}')
+        elif cout != '':
+            bot.send_message(message.from_user.id, cout)
+        elif err != '':
+            bot.send_message(message.from_user.id, err)
+        elif cout == '' and err == '':
+            bot.send_message(message.from_user.id, 'No Output')
     except AttributeError:
         err_msg = 'There is no active SSH session'
         bot.send_message(message.from_user.id, err_msg)

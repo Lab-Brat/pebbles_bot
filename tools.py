@@ -6,7 +6,7 @@ class Tools():
         self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
     def ssh_connect(self, host, port, uname, pwd):
-        # self.client.connect(host, port=port, username=uname, password=pwd)
+        self.client.connect(host, port=port, username=uname, password=pwd)
         try:
             self.client.connect(host, port=port, username=uname, password=pwd)
             return True
@@ -22,11 +22,15 @@ class Tools():
 
     def ssh_cmd(self, cmd):
         stdin, stdout, stderr = self.client.exec_command(cmd)
-        stdout_raw = [line.strip('\n') for line in stdout]
+        sout = self.translate_output(stdout)
+        serr = self.translate_output(stderr)
+        return sout, serr
+
+    def translate_output(self, output):
+        stdout_raw = [line.strip('\n') for line in output]
         stdout_fin = ''
         for part in stdout_raw:
             stdout_fin += part + '\n'
-
         return stdout_fin
 
 
