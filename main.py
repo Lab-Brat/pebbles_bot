@@ -7,10 +7,14 @@ from tools import Tools
 linux_user = subprocess.getoutput("echo $USER")
 tt = Tools()
 
-with open(f"/home/{linux_user}/bot_api.txt", 'r') as f:
-    bot_api = f.read()
-bot = telebot.TeleBot(bot_api.strip('\n'))
-
+try:
+    with open(f"/home/{linux_user}/bot_api.txt", 'r') as f:
+        bot_api = f.read()
+    bot = telebot.TeleBot(bot_api.strip('\n'))
+    print("Pebbles has started!")
+except FileNotFoundError:
+    print("File is not at /home/$USER, or incorrect filename")
+    raise SystemExit(0)
 
 @bot.message_handler(commands=['start'])
 def start(message):
