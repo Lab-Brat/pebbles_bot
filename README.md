@@ -21,18 +21,7 @@ At this stage Pebbles is not very sophisticated, it can only do one thing: run a
 - And much more!
 
 ## How-To
-#### Using Pebbles
-- find [@Pebbles_LinuxHelper_bot](https://t.me/Pebbles_LinuxHelper_bot) in Telegram search, and initiate a conversation
-- type ```/help``` to see available commands
-- type ```/login``` to establish a SSH connection with your host. User will be promted following information:
-  - IP address or hostname in the form \<IP\>:\<port\>, for example 8.8.8.8:22
-  - username 
-  - password
-- after that a confirmation message will be displayed, to confirm user must press on ```Yes```
-- after connection is established, commands can be run by first calling ```/run```, and then typing the command in the next message
-- type ```/logout``` to break the SSH connection
-
-#### Install and run locally
+#### Installing
 - Install dependencies
 ```
 python -m pip install pytelegrambotapi paramiko fabric
@@ -47,3 +36,13 @@ git clone https://github.com/Lab-Brat/pebbles_bot.git && cd pebbles_bot
 python main.py
 ```
 
+#### Using Pebbles
+- find Pebbles bot in Telegram search, and initiate a conversation
+- type ```/help``` to see available commands
+- type ```/login``` to establish a SSH connection with your host. User will be promted following information:
+  - IP address or hostname in the form \<IP\>:\<port\>, for example 8.8.8.8:22
+  - username 
+  - password
+- after that a confirmation message will be displayed, to confirm user must press on ```Yes```
+- after connection is established, commands can be run by first calling ```/run```, and then typing the command in the next message
+- type ```/logout``` to break the SSH connection
