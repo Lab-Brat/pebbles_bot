@@ -6,8 +6,7 @@
 
 ## Introduction
 Pebbles is a telegram bot, which is designed to allow Linux users to have access to their VMs on their phones.  
-You can find Pebbles by searching for [@Pebbles_LinuxHelper_bot](https://t.me/Pebbles_LinuxHelper_bot) in Telegram global search.  
-Alternatively, it is possible to clone the repo and run it locally. For that you need to ask [BotFather](https://core.telegram.org/bots#6-botfather) to create a bot for you, and then copy the bot's API hash to ```/home/$USER/bot_api.txt```.
+You can clone the repo and run the bot locally or on a VPS. For that you need to ask [BotFather](https://core.telegram.org/bots#6-botfather) to create a bot for you, and then copy the bot's API hash to ```/home/$USER/bot_api.txt```.
 
 **What It Can Do Now**  
 At this stage Pebbles is not very sophisticated, it can only do one thing: run a command with Paramiko library and return output to the user.  
