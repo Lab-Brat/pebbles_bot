@@ -14,6 +14,7 @@ except FileNotFoundError:
 class Pebbles:
     def __init__(self):
         self.bot = telebot.TeleBot(bot_api.strip('\n'))
+        self.tt  = Tools()
 
         @self.bot.message_handler(commands=['start'])
         def _start(message):
@@ -68,7 +69,7 @@ class Pebbles:
         Bot's /logout command, 
         terminates paramiko SSH session
         '''
-        Tools().ssh_disconnect()
+        self.tt.ssh_disconnect()
         self.bot.send_message(message.from_user.id, 'Session Terminated')
 
     # def start(self, message):
@@ -134,27 +135,27 @@ class Pebbles:
                         reply_markup=keyboard, parse_mode="markdown")
         print(f'[{message.from_user.id} was promted to verify data at {dt.now()}]')
 
-    # def run(self, message):
-    #     '''
-    #     Runs a linux error, returns stdout or stderr depending on the output
-    #     '''
-    #     global cmd
-    #     cmd = message.text
-    #     try:
-    #         cout, err = Tools.ssh_cmd(cmd)
-    #         if cout != '' and err != '':
-    #             bot.send_message(message.from_user.id, f'Command output: \n{cout}\n')
-    #             bot.send_message(message.from_user.id, f'Command output: \n{err}')
-    #         elif cout != '':
-    #             bot.send_message(message.from_user.id, cout)
-    #         elif err != '':
-    #             bot.send_message(message.from_user.id, err)
-    #         elif cout == '' and err == '':
-    #             bot.send_message(message.from_user.id, 'No Output')
-    #     except AttributeError:
-    #         err_msg = 'There is no active SSH session'
-    #         bot.send_message(message.from_user.id, err_msg)
-    #     print(f'[{message.from_user.id} called /run method at {dt.now()}]')
+    def run(self, message):
+        '''
+        Runs a linux error, returns stdout or stderr depending on the output
+        '''
+        global cmd
+        cmd = message.text
+        try:
+            cout, err = self.tt.ssh_cmd(cmd)
+            if cout != '' and err != '':
+                self.bot.send_message(message.from_user.id, f'Command output: \n{cout}\n')
+                self.bot.send_message(message.from_user.id, f'Command output: \n{err}')
+            elif cout != '':
+                self.bot.send_message(message.from_user.id, cout)
+            elif err != '':
+                self.bot.send_message(message.from_user.id, err)
+            elif cout == '' and err == '':
+                self.bot.send_message(message.from_user.id, 'No Output')
+        except AttributeError:
+            err_msg = 'There is no active SSH session'
+            self.bot.send_message(message.from_user.id, err_msg)
+        print(f'[{message.from_user.id} called /run method at {dt.now()}]')
 
     def callback_worker(self, call):
         '''
@@ -163,7 +164,7 @@ class Pebbles:
         if callback is no - suggest to run /login again
         '''
         if call.data == "yes":
-            con_result = Tools().ssh_connect(self.ip[0], self.ip[1], self.uname, self.paswd)
+            con_result = self.tt.ssh_connect(self.ip[0], self.ip[1], self.uname, self.paswd)
             if con_result == True:
                 self.bot.send_message(call.message.chat.id, 'Login Success')
             elif con_result == 'pass':
