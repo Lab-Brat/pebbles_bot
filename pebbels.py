@@ -1,6 +1,5 @@
+import logging
 import telebot
-from telebot import types
-from datetime import datetime as dt
 from pb_tools import Tools
 
 
@@ -8,6 +7,15 @@ class Pebbles:
     def __init__(self, api_key):
         self.bot = telebot.TeleBot(api_key)
         self.tt  = Tools()
+
+        logging.basicConfig(format='%(asctime)s %(message)s', 
+                    level=logging.INFO,
+                    handlers=[
+                        logging.FileHandler("pebbles.log"),
+                        logging.StreamHandler()
+                    ])
+        self.logger = logging.getLogger()
+
 
         @self.bot.message_handler(commands=['start'])
         def _start(message):
@@ -40,7 +48,7 @@ class Pebbles:
         start_message = ("Pebbles, at your service! "
                         "Please type /help for help")
         self.bot.reply_to(message, start_message)
-        print(f'[{message.from_user.id} called /start method at {dt.now()}]')
+        self.logger.info(f'[{message.from_user.id} called /start command]')
 
     def help(self, message):
         '''
@@ -55,7 +63,7 @@ class Pebbles:
             "/run ---------> run a linux command"
         )
         self.bot.reply_to(message, help_message)
-        print(f'[{message.from_user.id} called /help method at {dt.now()}]')
+        self.logger.info(f'[{message.from_user.id} called /help command]')
 
     def logout(self, message):
         '''
@@ -63,7 +71,7 @@ class Pebbles:
         terminates paramiko SSH session
         '''
         self.tt.ssh_disconnect()
-        self.bot.send_message(message.from_user.id, 'Session Terminated')
+        self.logger.info(f'[{message.from_user.id} called /logout command]')
 
     # def start(self, message):
     def main_seq(self, message):
@@ -74,8 +82,9 @@ class Pebbles:
             self.bot.send_message(message.from_user.id, 
                             'Enter **IP address**  [format -> IP:port]', 
                             parse_mode='markdown')
+            self.logger.info(f'[{message.from_user.id} called /login command]')
             self.bot.register_next_step_handler(message, self.get_ip)
-            print(f'[{message.from_user.id} called get_ip method at {dt.now()}]')
+            self.logger.info(f'[{message.from_user.id} called get_ip method]')
         elif message.text == '/run': # run a linux command
             self.bot.reply_to(message, "Enter command to run: ")
             self.bot.register_next_step_handler(message, self.run)
@@ -94,7 +103,7 @@ class Pebbles:
                         'Enter **username**',
                         parse_mode='markdown')
         self.bot.register_next_step_handler(message, self.get_uname)
-        print(f'[{message.from_user.id} called get_uname method at {dt.now()}]')
+        self.logger.info(f'[{message.from_user.id} called get_uname method]')
 
     def get_uname(self, message):
         '''
@@ -107,7 +116,7 @@ class Pebbles:
                         'Enter **password**',
                         parse_mode='markdown')
         self.bot.register_next_step_handler(message, self.get_pass)
-        print(f'[{message.from_user.id} called get_pass method at {dt.now()}]')
+        self.logger.info(f'[{message.from_user.id} called get_pass method]')
 
     def get_pass(self, message):
         '''
@@ -117,16 +126,16 @@ class Pebbles:
         # global paswd
         self.paswd = message.text
 
-        keyboard = types.InlineKeyboardMarkup()
-        key_yes = types.InlineKeyboardButton(text='yes', callback_data='yes')
+        keyboard = telebot.types.InlineKeyboardMarkup()
+        key_yes = telebot.types.InlineKeyboardButton(text='yes', callback_data='yes')
         keyboard.add(key_yes)
-        key_no= types.InlineKeyboardButton(text='no', callback_data='no')
+        key_no= telebot.types.InlineKeyboardButton(text='no', callback_data='no')
         keyboard.add(key_no)
         question = f"logging on to that machine {self.ip[0]}:{self.ip[1]} with user `{self.uname}`"
 
         self.bot.send_message(message.from_user.id, text=question, 
                         reply_markup=keyboard, parse_mode="markdown")
-        print(f'[{message.from_user.id} was promted to verify data at {dt.now()}]')
+        self.logger.info(f'[{message.from_user.id} was promted to verify data]')
 
     def run(self, message):
         '''
@@ -148,7 +157,7 @@ class Pebbles:
         except AttributeError:
             err_msg = 'There is no active SSH session'
             self.bot.send_message(message.from_user.id, err_msg)
-        print(f'[{message.from_user.id} called /run method at {dt.now()}]')
+        self.logger.info(f'[{message.from_user.id} called /run command]')
 
     def callback_worker(self, call):
         '''
@@ -166,7 +175,7 @@ class Pebbles:
                 self.bot.send_message(call.message.chat.id, 'Login Failed, Wrong Port')
             elif con_result == 'time':
                 self.bot.send_message(call.message.chat.id, 'Login Failed, Connection Timed Out')
-            print(f'[user pressed YES on the keyboard at {dt.now()}]')
+            self.logger.info(f'[user pressed YES on the keyboard]')
         elif call.data == "no":
             self.bot.send_message(call.message.chat.id, 'To start over enter /login again')
-            print(f'[user pressed NO on the keyboard] at {dt.now()}]')
+            self.logger.info(f'[user pressed NO on the keyboard]')

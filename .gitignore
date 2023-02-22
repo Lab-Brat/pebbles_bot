@@ -1,3 +1,5 @@
 venv/
 __pycache__
 pebbles_api
+pebbles.log
+
