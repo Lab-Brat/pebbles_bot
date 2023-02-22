@@ -1,4 +1,3 @@
-import fabric
 import paramiko
 
 class Tools():
