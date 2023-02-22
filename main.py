@@ -1,53 +1,51 @@
-import subprocess
 import telebot
 from telebot import types
 from datetime import datetime as dt
-from tools import Tools
+from pb_tools import Tools
 
-# get Linux host username
-linux_user = subprocess.getoutput("echo $USER")
-tt = Tools()
-
-# read bot api hash
 try:
-    with open(f"/home/{linux_user}/bot_api.txt", 'r') as f:
-        bot_api = f.read()
+    with open(f"pebbles_api", 'r') as api_key:
+        bot_api = api_key.read()
     bot = telebot.TeleBot(bot_api.strip('\n'))
     print("Pebbles has started!")
 except FileNotFoundError:
-    print("File is not at /home/$USER, or incorrect filename")
+    print("pebbles_api key file is not in the repo")
     raise SystemExit(0)
 
 @bot.message_handler(commands=['start'])
 def start(message):
     '''
-    Bot's /start command, display hello message and show /help link
+    Bot's /start command, 
+    display hello message and show /help link
     '''
-    bot.reply_to(message, "Pebbles, at your service! Please type /help for help")
+    start_message = ("Pebbles, at your service! "
+                     "Please type /help for help")
+    bot.reply_to(message, start_message)
     print(f'[{message.from_user.id} called /start method at {dt.now()}]')
 
-# bot's help command
 @bot.message_handler(commands=['help'])
 def help(message):
     '''
     Bot's /help command, list all available commands
     '''
-    l0 = "Commands that Pebbles knows:\n"
-    c1 = "/start -------> display start message\n"
-    c2 = "/help --------> display help message\n"
-    c3 = "/login -------> send a command to a Linux host\n"
-    c4 = "/logout -----> terminate ssh session\n"
-    c5 = "/run ---------> run a linux command"
-    help_message = f"{l0}{c1}{c2}{c3}{c4}{c5}"
+    help_message = (
+        "Commands that Pebbles knows:\n"
+        "/start -------> display start message\n"
+        "/help --------> display help message\n"
+        "/login -------> send a command to a Linux host\n"
+        "/logout -----> terminate ssh session\n"
+        "/run ---------> run a linux command"
+    )
     bot.reply_to(message, help_message)
     print(f'[{message.from_user.id} called /help method at {dt.now()}]')
 
 @bot.message_handler(commands=['logout'])
 def logout(message):
     '''
-    Bot's /logout command, terminates paramiko SSH session
+    Bot's /logout command, 
+    terminates paramiko SSH session
     '''
-    tt.ssh_disconnect()
+    Tools().ssh_disconnect()
     bot.send_message(message.from_user.id, 'Session Terminated')
 
 @bot.message_handler(content_types=['text'])
@@ -55,19 +53,18 @@ def start(message):
     '''
     Main sequence that processes all strings and commands with redirects
     '''
-    if message.text == '/login':
-        # Bot's /login command, establishes SSH connection with paramiko
-        entip = 'Enter **IP address**, format ---> IP:port'
-        bot.send_message(message.from_user.id, entip, parse_mode='markdown')
+    if message.text == '/login': # establish a SSH connection to host
+        bot.send_message(message.from_user.id, 
+                         'Enter **IP address**  [format -> IP:port]', 
+                         parse_mode='markdown')
         bot.register_next_step_handler(message, get_ip)
         print(f'[{message.from_user.id} called get_ip method at {dt.now()}]')
-    elif message.text == '/run':
-        # bot's run command, runs a linux command
+    elif message.text == '/run': # run a linux command
         bot.reply_to(message, "Enter command to run: ")
         bot.register_next_step_handler(message, run)
     else:
-        # display /help command if users input is not recognized
-        bot.send_message(message.from_user.id, 'I do not understand :(, call /help for help')
+        bot.send_message(message.from_user.id, 
+                        'I do not understand :( \ncall /help for help')
 
 def get_ip(message):
     '''
@@ -76,7 +73,9 @@ def get_ip(message):
     '''
     global ip
     ip = message.text.split(':')
-    bot.send_message(message.from_user.id, 'Enter **username**', parse_mode='markdown')
+    bot.send_message(message.from_user.id,
+                     'Enter **username**',
+                     parse_mode='markdown')
     bot.register_next_step_handler(message, get_uname)
     print(f'[{message.from_user.id} called get_uname method at {dt.now()}]')
 
@@ -117,7 +116,7 @@ def run(message):
     global cmd
     cmd = message.text
     try:
-        cout, err = tt.ssh_cmd(cmd)
+        cout, err = Tools.ssh_cmd(cmd)
         if cout != '' and err != '':
             bot.send_message(message.from_user.id, f'Command output: \n{cout}\n')
             bot.send_message(message.from_user.id, f'Command output: \n{err}')
@@ -141,7 +140,7 @@ def callback_worker(call):
     if callback is no - suggest to run /login again
     '''
     if call.data == "yes":
-        con_result = tt.ssh_connect(ip[0], ip[1], uname, paswd)
+        con_result = Tools().ssh_connect(ip[0], ip[1], uname, paswd)
         if con_result == True:
             bot.send_message(call.message.chat.id, 'Login Success')
         elif con_result == 'pass':
