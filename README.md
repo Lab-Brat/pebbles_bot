@@ -21,15 +21,17 @@ At this stage Pebbles is not very sophisticated, it can only do one thing: run a
 
 ## How-To
 #### Installing
-- Install dependencies
-```
-python -m pip install pytelegrambotapi paramiko fabric
-```
 - Clone the repository
 ```
 git clone https://github.com/Lab-Brat/pebbles_bot.git && cd pebbles_bot
 ```
-- Ask [BotFather](https://core.telegram.org/bots#6-botfather) to create a bot for you, then store the bot hash at ```/home/$USER/bot_api.txt```
+- Create a virtual environment and install dependencies
+```
+python -m venv venv
+source venv/bin/activate
+python -m pip install pytelegrambotapi paramiko
+```
+- Ask [BotFather](https://core.telegram.org/bots#6-botfather) to create a bot for you, then store the bot hash at ```/home/$USER/.telegram_bot/pebbles_api```
 - Run Pebbles
 ```
 python main.py
