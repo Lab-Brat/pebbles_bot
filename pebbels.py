@@ -33,6 +33,10 @@ class Pebbles:
         def _logout(message):
             self.logout(message)
 
+        @self.bot.message_handler(commands=['login'])
+        def _login(message):
+            self.login(message)
+
         @self.bot.message_handler(content_types=['text'])
         def _main_seq(message):
             self.main_seq(message)
@@ -82,21 +86,21 @@ class Pebbles:
         '''
         Main sequence that processes all strings and commands with redirects
         '''
-        if message.text == '/login': # establish a SSH connection to host
-            self.bot.send_message(
-                        message.from_user.id, 
-                        'Enter **IP address**  [format -> IP:port]', 
-                        parse_mode='markdown')
-            self.logger.info(f'[{message.from_user.id} called /login command]')
-            self.bot.register_next_step_handler(message, self.get_ip)
-            self.logger.info(f'[{message.from_user.id} called get_ip method]')
-        elif message.text == '/run': # run a linux command
+        if message.text == '/run': # run a linux command
             self.bot.reply_to(message, "Enter command to run: ")
             self.bot.register_next_step_handler(message, self.run)
         else:
             self.bot.send_message(
                         message.from_user.id,
                         'I do not understand :( \ncall /help for help')
+
+    def login(self, message):
+        self.logger.info(f'[{message.from_user.id} called /login command]')
+        self.bot.send_message(
+                    message.from_user.id, 
+                    'Enter **IP address**  [format -> IP:port]', 
+                    parse_mode='markdown')
+        self.bot.register_next_step_handler(message, self.get_ip)
             
     def _valid_ip_hn(self, ip):
         '''
@@ -129,6 +133,7 @@ class Pebbles:
         Takes IP address and port of the remote host as input,
         redirects to get_uname
         '''
+        self.logger.info(f'[{message.from_user.id} called get_ip method]')
         self.host = self._parse_ip(message)
         if not self.host['resolved']:
             err_message = f"{self.host['host']} cannot be resolved"
@@ -140,26 +145,26 @@ class Pebbles:
                         'Enter **username**',
                         parse_mode='markdown')
             self.bot.register_next_step_handler(message, self.get_uname)
-            self.logger.info(f'[{message.from_user.id} called get_uname method]')
 
     def get_uname(self, message):
         '''
         Takes username of the remote host as input,
         redirects to get_pass
         '''
+        self.logger.info(f'[{message.from_user.id} called get_uname method]')
         self.uname = message.text
         self.bot.send_message(
                     message.from_user.id,
                     'Enter **password**',
                     parse_mode='markdown')
         self.bot.register_next_step_handler(message, self.get_pass)
-        self.logger.info(f'[{message.from_user.id} called get_pass method]')
 
     def get_pass(self, message):
         '''
         Takes remote host's password as input,
         displays confirmation message
         '''
+        self.logger.info(f'[{message.from_user.id} called get_pass method]')
         self.paswd = message.text
 
         keyboard = ik_markup()
@@ -174,7 +179,6 @@ class Pebbles:
                     text=question, 
                     reply_markup=keyboard, 
                     parse_mode="markdown")
-        self.logger.info(f'[{message.from_user.id} was promted to verify data]')
 
     def run(self, message):
         '''
