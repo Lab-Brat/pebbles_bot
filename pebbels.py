@@ -37,9 +37,13 @@ class Pebbles:
         def _login(message):
             self.login(message)
 
+        @self.bot.message_handler(commands=['run'])
+        def _run(message):
+            self.run(message)
+
         @self.bot.message_handler(content_types=['text'])
-        def _main_seq(message):
-            self.main_seq(message)
+        def _rest(message):
+            self.rest(message)
 
         @self.bot.callback_query_handler(func=lambda call: True)
         def _callback_worker(call):
@@ -81,18 +85,6 @@ class Pebbles:
         self.tt.ssh_disconnect()
         self.bot.reply_to(message, 'SSH connection terminated')
         self.logger.info(f'[{message.from_user.id} called /logout command]')
-
-    def main_seq(self, message):
-        '''
-        Main sequence that processes all strings and commands with redirects
-        '''
-        if message.text == '/run': # run a linux command
-            self.bot.reply_to(message, "Enter command to run: ")
-            self.bot.register_next_step_handler(message, self.run)
-        else:
-            self.bot.send_message(
-                        message.from_user.id,
-                        'I do not understand :( \ncall /help for help')
 
     def login(self, message):
         self.logger.info(f'[{message.from_user.id} called /login command]')
@@ -179,8 +171,12 @@ class Pebbles:
                     text=question, 
                     reply_markup=keyboard, 
                     parse_mode="markdown")
-
+        
     def run(self, message):
+        self.bot.reply_to(message, "Enter command to run: ")
+        self.bot.register_next_step_handler(message, self.run_command)
+
+    def run_command(self, message):
         '''
         Runs a linux error, returns stdout or stderr depending on the output
         '''
@@ -242,3 +238,10 @@ class Pebbles:
                 call.message.chat.id,
                 'To start over enter /login again')
             self.logger.info(f'[user pressed NO on the keyboard]')
+
+    def rest(self, message):
+        '''
+        Process input that is not defined.
+        '''
+        self.bot.send_message(message.from_user.id,
+                'I do not understand :( \ncall /help for help')
