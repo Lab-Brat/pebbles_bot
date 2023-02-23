@@ -1,5 +1,6 @@
 import logging
 import telebot
+from socket import gethostbyname
 from pb_tools import Tools
 
 
@@ -91,6 +92,32 @@ class Pebbles:
         else:
             self.bot.send_message(message.from_user.id, 
                             'I do not understand :( \ncall /help for help')
+            
+    def _valid_ip_hn(self, ip):
+        '''
+        Check if input is a valid IP address, 
+        or try to resolve it in case of a hostname.
+        Return a boolean.
+        '''
+        try:
+            gethostbyname(ip)
+            return True
+        except:
+            return False
+
+    def _parse_ip(self, message):
+        '''
+        Takes <ip>:<port> as input, 
+        validates IP and reads it and port into a dict.
+        If port is missing, default SSH port is assigned.
+        '''
+        msg_split = message.text.split(':')
+        host = msg_split[0]
+        port = '22' if len(msg_split) == 1 else msg_split[1]
+        resolved = True if self._valid_ip_hn(msg_split[0]) else False
+        return {'host': host, 
+                'port': port,
+                'resolved': resolved}
 
     def get_ip(self, message):
         '''
@@ -98,12 +125,17 @@ class Pebbles:
         redirects to get_uname
         '''
         # global ip
-        self.ip = message.text.split(':')
-        self.bot.send_message(message.from_user.id,
-                        'Enter **username**',
-                        parse_mode='markdown')
-        self.bot.register_next_step_handler(message, self.get_uname)
-        self.logger.info(f'[{message.from_user.id} called get_uname method]')
+        self.host = self._parse_ip(message)
+        if not self.host['resolved']:
+            err_message = f"{self.host['host']} cannot be resolved"
+            self.bot.send_message(message.from_user.id, err_message)
+            self.logger.info(f"[{message.from_user.id} {err_message}")
+        else:
+            self.bot.send_message(message.from_user.id,
+                            'Enter **username**',
+                            parse_mode='markdown')
+            self.bot.register_next_step_handler(message, self.get_uname)
+            self.logger.info(f'[{message.from_user.id} called get_uname method]')
 
     def get_uname(self, message):
         '''
@@ -131,7 +163,7 @@ class Pebbles:
         keyboard.add(key_yes)
         key_no= telebot.types.InlineKeyboardButton(text='no', callback_data='no')
         keyboard.add(key_no)
-        question = f"logging on to that machine {self.ip[0]}:{self.ip[1]} with user `{self.uname}`"
+        question = f"logging on to that machine {self.host['host']}:{self.host['port']} with user `{self.uname}`"
 
         self.bot.send_message(message.from_user.id, text=question, 
                         reply_markup=keyboard, parse_mode="markdown")
@@ -166,7 +198,11 @@ class Pebbles:
         if callback is no - suggest to run /login again
         '''
         if call.data == "yes":
-            con_result = self.tt.ssh_connect(self.ip[0], self.ip[1], self.uname, self.paswd)
+            con_result = self.tt.ssh_connect(
+                                self.host['host'], 
+                                self.host['port'], 
+                                self.uname, 
+                                self.paswd)
             if con_result == True:
                 self.bot.send_message(call.message.chat.id, 'Login Success')
             elif con_result == 'pass':
