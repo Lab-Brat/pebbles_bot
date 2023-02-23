@@ -1,15 +1,18 @@
 import logging
-import telebot
-from socket import gethostbyname
 from pb_tools import Tools
+from socket import gethostbyname
+from telebot import TeleBot
+from telebot.types import InlineKeyboardMarkup as ik_markup
+from telebot.types import InlineKeyboardButton as ik_button
 
 
 class Pebbles:
     def __init__(self, api_key):
-        self.bot = telebot.TeleBot(api_key)
+        self.bot = TeleBot(api_key)
         self.tt  = Tools()
 
-        logging.basicConfig(format='%(asctime)s %(message)s', 
+        logging.basicConfig(
+                    format='%(asctime)s %(message)s', 
                     level=logging.INFO,
                     handlers=[
                         logging.FileHandler("pebbles.log"),
@@ -72,17 +75,18 @@ class Pebbles:
         terminates paramiko SSH session
         '''
         self.tt.ssh_disconnect()
+        self.bot.reply_to(message, 'SSH connection terminated')
         self.logger.info(f'[{message.from_user.id} called /logout command]')
 
-    # def start(self, message):
     def main_seq(self, message):
         '''
         Main sequence that processes all strings and commands with redirects
         '''
         if message.text == '/login': # establish a SSH connection to host
-            self.bot.send_message(message.from_user.id, 
-                            'Enter **IP address**  [format -> IP:port]', 
-                            parse_mode='markdown')
+            self.bot.send_message(
+                        message.from_user.id, 
+                        'Enter **IP address**  [format -> IP:port]', 
+                        parse_mode='markdown')
             self.logger.info(f'[{message.from_user.id} called /login command]')
             self.bot.register_next_step_handler(message, self.get_ip)
             self.logger.info(f'[{message.from_user.id} called get_ip method]')
@@ -90,8 +94,9 @@ class Pebbles:
             self.bot.reply_to(message, "Enter command to run: ")
             self.bot.register_next_step_handler(message, self.run)
         else:
-            self.bot.send_message(message.from_user.id, 
-                            'I do not understand :( \ncall /help for help')
+            self.bot.send_message(
+                        message.from_user.id,
+                        'I do not understand :( \ncall /help for help')
             
     def _valid_ip_hn(self, ip):
         '''
@@ -124,16 +129,16 @@ class Pebbles:
         Takes IP address and port of the remote host as input,
         redirects to get_uname
         '''
-        # global ip
         self.host = self._parse_ip(message)
         if not self.host['resolved']:
             err_message = f"{self.host['host']} cannot be resolved"
             self.bot.send_message(message.from_user.id, err_message)
             self.logger.info(f"[{message.from_user.id} {err_message}")
         else:
-            self.bot.send_message(message.from_user.id,
-                            'Enter **username**',
-                            parse_mode='markdown')
+            self.bot.send_message(
+                        message.from_user.id,
+                        'Enter **username**',
+                        parse_mode='markdown')
             self.bot.register_next_step_handler(message, self.get_uname)
             self.logger.info(f'[{message.from_user.id} called get_uname method]')
 
@@ -142,11 +147,11 @@ class Pebbles:
         Takes username of the remote host as input,
         redirects to get_pass
         '''
-        # global uname
         self.uname = message.text
-        self.bot.send_message(message.from_user.id,
-                        'Enter **password**',
-                        parse_mode='markdown')
+        self.bot.send_message(
+                    message.from_user.id,
+                    'Enter **password**',
+                    parse_mode='markdown')
         self.bot.register_next_step_handler(message, self.get_pass)
         self.logger.info(f'[{message.from_user.id} called get_pass method]')
 
@@ -155,18 +160,20 @@ class Pebbles:
         Takes remote host's password as input,
         displays confirmation message
         '''
-        # global paswd
         self.paswd = message.text
 
-        keyboard = telebot.types.InlineKeyboardMarkup()
-        key_yes = telebot.types.InlineKeyboardButton(text='yes', callback_data='yes')
-        keyboard.add(key_yes)
-        key_no= telebot.types.InlineKeyboardButton(text='no', callback_data='no')
-        keyboard.add(key_no)
-        question = f"logging on to that machine {self.host['host']}:{self.host['port']} with user `{self.uname}`"
+        keyboard = ik_markup()
+        keyboard.add(ik_button(text='yes', callback_data='yes'))
+        keyboard.add(ik_button(text='no', callback_data='no'))
+        question = (f"Establish SSH connection to " 
+                    f"{self.host['host']}:{self.host['port']} "
+                    f"with user `{self.uname}`?")
 
-        self.bot.send_message(message.from_user.id, text=question, 
-                        reply_markup=keyboard, parse_mode="markdown")
+        self.bot.send_message(
+                    message.from_user.id,
+                    text=question, 
+                    reply_markup=keyboard, 
+                    parse_mode="markdown")
         self.logger.info(f'[{message.from_user.id} was promted to verify data]')
 
     def run(self, message):
@@ -178,14 +185,20 @@ class Pebbles:
         try:
             cout, err = self.tt.ssh_cmd(cmd)
             if cout != '' and err != '':
-                self.bot.send_message(message.from_user.id, f'Command output: \n{cout}\n')
-                self.bot.send_message(message.from_user.id, f'Command output: \n{err}')
+                self.bot.send_message(
+                    message.from_user.id,
+                    f'Command output: \n{cout}\n')
+                self.bot.send_message(
+                    message.from_user.id,
+                    f'Command output: \n{err}')
             elif cout != '':
                 self.bot.send_message(message.from_user.id, cout)
             elif err != '':
                 self.bot.send_message(message.from_user.id, err)
             elif cout == '' and err == '':
-                self.bot.send_message(message.from_user.id, 'No Output')
+                self.bot.send_message(
+                    message.from_user.id,
+                    'No Output')
         except AttributeError:
             err_msg = 'There is no active SSH session'
             self.bot.send_message(message.from_user.id, err_msg)
@@ -204,14 +217,24 @@ class Pebbles:
                                 self.uname, 
                                 self.paswd)
             if con_result == True:
-                self.bot.send_message(call.message.chat.id, 'Login Success')
+                self.bot.send_message(
+                    call.message.chat.id,
+                    'Login Success')
             elif con_result == 'pass':
-                self.bot.send_message(call.message.chat.id, 'Login Failed, Wrong Password')
+                self.bot.send_message(
+                    call.message.chat.id,
+                    'Login Failed, Wrong Password')
             elif con_result == 'port':
-                self.bot.send_message(call.message.chat.id, 'Login Failed, Wrong Port')
+                self.bot.send_message(
+                    call.message.chat.id,
+                    'Login Failed, Wrong Port')
             elif con_result == 'time':
-                self.bot.send_message(call.message.chat.id, 'Login Failed, Connection Timed Out')
+                self.bot.send_message(
+                    call.message.chat.id,
+                    'Login Failed, Connection Timed Out')
             self.logger.info(f'[user pressed YES on the keyboard]')
         elif call.data == "no":
-            self.bot.send_message(call.message.chat.id, 'To start over enter /login again')
+            self.bot.send_message(
+                call.message.chat.id,
+                'To start over enter /login again')
             self.logger.info(f'[user pressed NO on the keyboard]')
