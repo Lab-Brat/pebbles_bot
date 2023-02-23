@@ -1,38 +1,44 @@
-import paramiko
+from paramiko import SSHClient, AutoAddPolicy
+from paramiko.ssh_exception import (
+    AuthenticationException,
+    NoValidConnectionsError
+)
 
 class Tools():
     def __init__(self):
-        # instantiate paramiko ssh client
-        self.client = paramiko.SSHClient()
-        self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        self.client = SSHClient()
+        self.client.set_missing_host_key_policy(AutoAddPolicy())
 
     def ssh_connect(self, host, port, uname, pwd):
         '''
-        Establish ssh connection
+        Establish a SSH connection
         '''
-        self.client.connect(host, port=port, username=uname, password=pwd)
         try:
-            self.client.connect(host, port=port, username=uname, password=pwd)
+            self.client.connect(
+                host,
+                port=port,
+                username=uname,
+                password=pwd)
             return True
-        except paramiko.ssh_exception.AuthenticationException:
+        except AuthenticationException:
             return 'pass'
-        except paramiko.ssh_exception.NoValidConnectionsError:
+        except NoValidConnectionsError:
             return 'port'
         except TimeoutError:
             return 'time'
 
     def ssh_disconnect(self):
         '''
-        Terminate ssh connection
+        Terminate a SSH connection
         '''
         self.client.close()
 
     def ssh_cmd(self, cmd):
         '''
-        Run a linux command supplied by the user,
+        Run a linux command supplied by user,
         output standard output and standard error
         '''
-        stdin, stdout, stderr = self.client.exec_command(cmd)
+        _, stdout, stderr = self.client.exec_command(cmd)
         sout = self.translate_output(stdout)
         serr = self.translate_output(stderr)
         return sout, serr
@@ -50,7 +56,3 @@ class Tools():
             for part in stdout_raw:
                 stdout_fin = part
         return stdout_fin
-
-
-if __name__ == '__main__':
-    pass

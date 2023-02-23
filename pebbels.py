@@ -1,9 +1,12 @@
 import logging
-from pb_tools import Tools
 from socket import gethostbyname
+from pb_tools import Tools
+
 from telebot import TeleBot
-from telebot.types import InlineKeyboardMarkup as ik_markup
-from telebot.types import InlineKeyboardButton as ik_button
+from telebot.types import (
+    InlineKeyboardMarkup as ik_markup,
+    InlineKeyboardButton as ik_button
+)
 
 
 class Pebbles:
@@ -190,10 +193,8 @@ class Pebbles:
         Receives command from /run
         runs it using methods from pb_tools.py
         '''
-        global cmd
-        cmd = message.text
         try:
-            cout, err = self.tt.ssh_cmd(cmd)
+            cout, err = self.tt.ssh_cmd(message.text)
             if cout != '' and err != '':
                 self.bot.send_message(
                     message.from_user.id,
