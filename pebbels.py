@@ -54,22 +54,33 @@ class Pebbles:
 
         self.bot.polling(interval=0)
 
+    def log(self, info, log=''):
+        '''
+        Simplifies the use of logger library,
+        and makes logger look cleaner in the code.
+        '''
+        uid = info.from_user.id
+        if '/' in  log:
+            self.logger.info(f'[{uid} called {log} command]')
+        else:
+            self.logger.info(f'[{uid} {log}]')
 
     def start(self, message):
         '''
         /start command
         Function: display hello message and show /help link
         '''
+        self.log(message, log='/start')
         start_message = ("Pebbles, at your service! "
                         "Please type /help for help")
         self.bot.reply_to(message, start_message)
-        self.logger.info(f'[{message.from_user.id} called /start command]')
 
     def help(self, message):
         '''
         /help command
         Funcion: list all available commands
         '''
+        self.log(message, log='/help')
         help_message = (
             "Commands that Pebbles knows:\n"
             "/start -------> display start message\n"
@@ -79,29 +90,28 @@ class Pebbles:
             "/run ---------> run a linux command"
         )
         self.bot.reply_to(message, help_message)
-        self.logger.info(f'[{message.from_user.id} called /help command]')
 
     def logout(self, message):
         '''
         /logout command
         Function: terminates paramiko SSH session
         '''
+        self.log(message, log='/logout')
         self.tt.ssh_disconnect()
         self.bot.reply_to(message, 'SSH connection terminated')
-        self.logger.info(f'[{message.from_user.id} called /logout command]')
 
     def login(self, message):
         '''
         /login command
         Function: initialize SSH connection
         '''
-        self.logger.info(f'[{message.from_user.id} called /login command]')
+        self.log(message, log='/login')
         self.bot.send_message(
                     message.from_user.id, 
                     'Enter **IP address**  [format -> IP:port]', 
                     parse_mode='markdown')
         self.bot.register_next_step_handler(message, self.get_ip)
-            
+      
     def _valid_ip_hn(self, ip):
         '''
         Check if input is a valid IP address, 
@@ -133,12 +143,12 @@ class Pebbles:
         Takes IP address and port of the remote host as input,
         redirects to get_uname
         '''
-        self.logger.info(f'[{message.from_user.id} called get_ip method]')
+        self.log(message, 'called get_ip method')
         self.host = self._parse_ip(message)
         if not self.host['resolved']:
             err_message = f"{self.host['host']} cannot be resolved"
             self.bot.send_message(message.from_user.id, err_message)
-            self.logger.info(f"[{message.from_user.id} {err_message}")
+            self.log(message, err_message)
         else:
             self.bot.send_message(
                         message.from_user.id,
@@ -151,7 +161,7 @@ class Pebbles:
         Takes username of the remote host as input,
         redirects to get_pass
         '''
-        self.logger.info(f'[{message.from_user.id} called get_uname method]')
+        self.log(message, 'called get_uname method')
         self.uname = message.text
         self.bot.send_message(
                     message.from_user.id,
@@ -164,7 +174,7 @@ class Pebbles:
         Takes remote host's password as input,
         displays confirmation message
         '''
-        self.logger.info(f'[{message.from_user.id} called get_pass method]')
+        self.log(message, 'called get_pass method')
         self.paswd = message.text
 
         keyboard = ik_markup()
@@ -179,12 +189,13 @@ class Pebbles:
                     text=question, 
                     reply_markup=keyboard, 
                     parse_mode="markdown")
-        
+
     def run(self, message):
         '''
         /run command
         Function: run a Linux command
         '''
+        self.log(message, log='/run')
         self.bot.reply_to(message, "Enter command to run: ")
         self.bot.register_next_step_handler(message, self.run_command)
 
@@ -195,6 +206,7 @@ class Pebbles:
         '''
         try:
             cout, err = self.tt.ssh_cmd(message.text)
+            self.log(message, f'ran => {message.text}')
             if cout != '' and err != '':
                 self.bot.send_message(
                     message.from_user.id,
@@ -213,7 +225,6 @@ class Pebbles:
         except AttributeError:
             err_msg = 'There is no active SSH session'
             self.bot.send_message(message.from_user.id, err_msg)
-        self.logger.info(f'[{message.from_user.id} called /run command]')
 
     def callback_worker(self, call):
         '''
@@ -243,12 +254,12 @@ class Pebbles:
                 self.bot.send_message(
                     call.message.chat.id,
                     'Login Failed, Connection Timed Out')
-            self.logger.info(f'[user pressed YES on the keyboard]')
+            self.log(call, 'pressed YES on the keyboard')
         elif call.data == "no":
             self.bot.send_message(
                 call.message.chat.id,
                 'To start over enter /login again')
-            self.logger.info(f'[user pressed NO on the keyboard]')
+            self.log(call, 'pressed NO on the keyboard')
 
     def rest(self, message):
         '''
