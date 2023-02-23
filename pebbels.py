@@ -54,8 +54,8 @@ class Pebbles:
 
     def start(self, message):
         '''
-        Bot's /start command, 
-        display hello message and show /help link
+        /start command
+        Function: display hello message and show /help link
         '''
         start_message = ("Pebbles, at your service! "
                         "Please type /help for help")
@@ -64,7 +64,8 @@ class Pebbles:
 
     def help(self, message):
         '''
-        Bot's /help command, list all available commands
+        /help command
+        Funcion: list all available commands
         '''
         help_message = (
             "Commands that Pebbles knows:\n"
@@ -79,14 +80,18 @@ class Pebbles:
 
     def logout(self, message):
         '''
-        Bot's /logout command, 
-        terminates paramiko SSH session
+        /logout command
+        Function: terminates paramiko SSH session
         '''
         self.tt.ssh_disconnect()
         self.bot.reply_to(message, 'SSH connection terminated')
         self.logger.info(f'[{message.from_user.id} called /logout command]')
 
     def login(self, message):
+        '''
+        /login command
+        Function: initialize SSH connection
+        '''
         self.logger.info(f'[{message.from_user.id} called /login command]')
         self.bot.send_message(
                     message.from_user.id, 
@@ -173,12 +178,17 @@ class Pebbles:
                     parse_mode="markdown")
         
     def run(self, message):
+        '''
+        /run command
+        Function: run a Linux command
+        '''
         self.bot.reply_to(message, "Enter command to run: ")
         self.bot.register_next_step_handler(message, self.run_command)
 
     def run_command(self, message):
         '''
-        Runs a linux error, returns stdout or stderr depending on the output
+        Receives command from /run
+        runs it using methods from pb_tools.py
         '''
         global cmd
         cmd = message.text
@@ -241,7 +251,7 @@ class Pebbles:
 
     def rest(self, message):
         '''
-        Process input that is not defined.
+        Process input that is not defined
         '''
         self.bot.send_message(message.from_user.id,
                 'I do not understand :( \ncall /help for help')
