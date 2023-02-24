@@ -73,4 +73,6 @@ class Tools():
     def decode(self, output):
         if output is not None:
             return output.decode('utf-8')
+        else:
+            return ''
     

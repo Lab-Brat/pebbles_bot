@@ -91,6 +91,7 @@ class Pebbles:
             "Commands that Pebbles knows:\n"
             "/start -------> display start message\n"
             "/help --------> display help message\n"
+            "/mode --------> change mode between local and remote"
             "/login -------> send a command to a Linux host\n"
             "/logout -----> terminate ssh session\n"
             "/run ---------> run a linux command"
@@ -254,6 +255,24 @@ class Pebbles:
             err_msg = 'There is no active SSH session'
             self.bot.send_message(message.from_user.id, err_msg)
 
+    def _connect(self, chat_id, con_result):
+        '''
+        Use Paramiko to connect to remote host,
+        return connection status.
+        '''
+        if con_result == True:
+            self.bot.send_message(
+                chat_id, 'Login Success')
+        elif con_result == 'pass':
+            self.bot.send_message(
+                chat_id, 'Login Failed, Wrong Password')
+        elif con_result == 'port':
+            self.bot.send_message(
+                chat_id, 'Login Failed, Wrong Port')
+        elif con_result == 'time':
+            self.bot.send_message(
+                chat_id, 'Login Failed, Connection Timed Out')
+
     def callback_worker(self, call):
         '''
         Process callback data from the confirmation message,
@@ -261,33 +280,18 @@ class Pebbles:
         if callback is no - suggest to run /login again
         '''
         if call.data == "yes":
+            self.log(call, 'pressed YES on the keyboard')
             con_result = self.ssh.ssh_connect(
                                 self.host['host'], 
                                 self.host['port'], 
                                 self.uname, 
                                 self.paswd)
-            if con_result == True:
-                self.bot.send_message(
-                    call.message.chat.id,
-                    'Login Success')
-            elif con_result == 'pass':
-                self.bot.send_message(
-                    call.message.chat.id,
-                    'Login Failed, Wrong Password')
-            elif con_result == 'port':
-                self.bot.send_message(
-                    call.message.chat.id,
-                    'Login Failed, Wrong Port')
-            elif con_result == 'time':
-                self.bot.send_message(
-                    call.message.chat.id,
-                    'Login Failed, Connection Timed Out')
-            self.log(call, 'pressed YES on the keyboard')
+            self._connect(call.message.chat.id, con_result)
         elif call.data == "no":
+            self.log(call, 'pressed NO on the keyboard')
             self.bot.send_message(
                 call.message.chat.id,
                 'To start over enter /login again')
-            self.log(call, 'pressed NO on the keyboard')
         elif call.data == 'remote':         
             self.pebbles_mode = 'remote'
             self.bot.send_message(
