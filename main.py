@@ -1,12 +1,15 @@
 from pebbels import Pebbles
 
-if __name__ == '__main__':
+def reader(file):
     try:
-        with open(f"pebbles_api", 'r') as api_key:
-            bot_api = api_key.read().strip('\n')
-        print("Pebbles has started!")
+        with open(file) as f:
+            return f.read().split('\n')
     except FileNotFoundError:
-        print("pebbles_api key file is not in the repo")
-        raise SystemExit(0)
+        print(f"{file} was not found")
+
+
+if __name__ == '__main__':
+    bot_api = reader('pebbles_api')[0]
+    whitelist = reader('pebbles_whitelist')
     
-    pebbles = Pebbles(bot_api)
+    Pebbles(bot_api, whitelist)

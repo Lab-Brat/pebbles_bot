@@ -9,12 +9,31 @@ from telebot.types import (
 )
 
 
+def security_check(method):
+    '''
+    Attempt to find user ID in uid whitelist,
+    allow uid to run command if found,
+    block if not found.
+    '''
+    def wrapper(self, message):
+        uid = str(message.from_user.id)
+        if uid in self.uid_whitelist:
+            method(self, message)
+            self.log(message, f'>!< {uid} was ALLOWED')
+        else:
+            self.bot.reply_to(message, 'Not Allowed!')
+            self.log(message, f'>!< {uid} was BLOCKED')
+    return wrapper
+
+
 class Pebbles:
-    def __init__(self, api_key):
+    def __init__(self, api_key, whitelist):
         self.bot = TeleBot(api_key)
         self.tls = Tools()
         self.ssh = SSH_Tools()
         self.pebbles_mode = 'local'
+
+        self.uid_whitelist = whitelist
 
         logging.basicConfig(
                     format='%(asctime)s %(message)s', 
@@ -71,6 +90,7 @@ class Pebbles:
         else:
             self.logger.info(f'[{uid} {log}]')
 
+    @security_check
     def start(self, message):
         '''
         /start command
@@ -81,6 +101,7 @@ class Pebbles:
                         "Please type /help for help")
         self.bot.reply_to(message, start_message)
 
+    @security_check
     def help(self, message):
         '''
         /help command
@@ -98,6 +119,7 @@ class Pebbles:
         )
         self.bot.reply_to(message, help_message)
 
+    @security_check
     def logout(self, message):
         '''
         /logout command
@@ -107,6 +129,7 @@ class Pebbles:
         self.ssh.ssh_disconnect()
         self.bot.reply_to(message, 'SSH connection terminated')
 
+    @security_check
     def login(self, message):
         '''
         /login command
@@ -118,7 +141,7 @@ class Pebbles:
                     'Enter **IP address**  [format -> IP:port]', 
                     parse_mode='markdown')
         self.bot.register_next_step_handler(message, self.get_ip)
-      
+
     def _valid_ip_hn(self, ip):
         '''
         Check if input is a valid IP address, 
@@ -197,6 +220,7 @@ class Pebbles:
                     reply_markup=keyboard, 
                     parse_mode="markdown")
 
+    @security_check
     def run(self, message):
         '''
         /run command
@@ -207,6 +231,7 @@ class Pebbles:
         self.bot.reply_to(message, "Enter command to run: ")
         self.bot.register_next_step_handler(message, self.run_command)
 
+    @security_check
     def mode(self, message):
         '''
         /mode command
