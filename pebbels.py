@@ -1,6 +1,6 @@
 import logging
 from socket import gethostbyname
-from pb_tools import Tools
+from pb_tools import Tools, SSH_Tools
 
 from telebot import TeleBot
 from telebot.types import (
@@ -12,7 +12,9 @@ from telebot.types import (
 class Pebbles:
     def __init__(self, api_key):
         self.bot = TeleBot(api_key)
-        self.tt  = Tools()
+        self.tls = Tools()
+        self.ssh = SSH_Tools()
+        self.pebbles_mode = 'local'
 
         logging.basicConfig(
                     format='%(asctime)s %(message)s', 
@@ -42,7 +44,11 @@ class Pebbles:
 
         @self.bot.message_handler(commands=['run'])
         def _run(message):
-            self.run(message)
+            self.run(message)        
+            
+        @self.bot.message_handler(commands=['mode'])
+        def _mode(message):
+            self.mode(message)
 
         @self.bot.message_handler(content_types=['text'])
         def _rest(message):
@@ -97,7 +103,7 @@ class Pebbles:
         Function: terminates paramiko SSH session
         '''
         self.log(message, log='/logout')
-        self.tt.ssh_disconnect()
+        self.ssh.ssh_disconnect()
         self.bot.reply_to(message, 'SSH connection terminated')
 
     def login(self, message):
@@ -133,7 +139,7 @@ class Pebbles:
         msg_split = message.text.split(':')
         host = msg_split[0]
         port = '22' if len(msg_split) == 1 else msg_split[1]
-        resolved = True if self._valid_ip_hn(msg_split[0]) else False
+        resolved = True if self._valid_ip_hn(host) else False
         return {'host': host, 
                 'port': port,
                 'resolved': resolved}
@@ -193,20 +199,42 @@ class Pebbles:
     def run(self, message):
         '''
         /run command
-        Function: run a Linux command
+        Function: runs a shell command locally or on a remote 
+                  server, depending on mode
         '''
         self.log(message, log='/run')
         self.bot.reply_to(message, "Enter command to run: ")
         self.bot.register_next_step_handler(message, self.run_command)
 
+    def mode(self, message):
+        '''
+        /mode command
+        Function: Switch mode between local and remote
+        '''
+        self.log(message, log='/mode')
+        keyboard = ik_markup()
+        keyboard.add(ik_button(text='Locally', callback_data='local'))
+        keyboard.add(ik_button(text='Remotely', callback_data='remote'))
+        question = (f"Run commands ...")
+        
+        self.bot.send_message(
+            message.from_user.id,
+            text=question, 
+            reply_markup=keyboard, 
+            parse_mode="markdown")
+
     def run_command(self, message):
         '''
-        Receives command from /run
+        Receives command from /run_command
         runs it using methods from pb_tools.py
         '''
         try:
-            cout, err = self.tt.ssh_cmd(message.text)
-            self.log(message, f'ran => {message.text}')
+            if self.pebbles_mode == 'remote':
+                cout, err = self.ssh.ssh_cmd(message.text)
+                self.log(message, f'ran (remote) => {message.text}')
+            elif self.pebbles_mode == 'local':
+                cout, err, _ = self.tls.os_cmd(message.text)
+                self.log(message, f'ran => {message.text}')
             if cout != '' and err != '':
                 self.bot.send_message(
                     message.from_user.id,
@@ -233,7 +261,7 @@ class Pebbles:
         if callback is no - suggest to run /login again
         '''
         if call.data == "yes":
-            con_result = self.tt.ssh_connect(
+            con_result = self.ssh.ssh_connect(
                                 self.host['host'], 
                                 self.host['port'], 
                                 self.uname, 
@@ -260,6 +288,16 @@ class Pebbles:
                 call.message.chat.id,
                 'To start over enter /login again')
             self.log(call, 'pressed NO on the keyboard')
+        elif call.data == 'remote':         
+            self.pebbles_mode = 'remote'
+            self.bot.send_message(
+                call.message.chat.id,
+                'Pebbles mode: Remote')
+        elif call.data == 'local':
+            self.pebbles_mode = 'local'
+            self.bot.send_message(
+                call.message.chat.id,
+                'Pebbles mode: Local')
 
     def rest(self, message):
         '''
