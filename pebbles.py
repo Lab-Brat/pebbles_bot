@@ -112,7 +112,7 @@ class Pebbles:
             "Commands that Pebbles knows:\n"
             "/start -------> display start message\n"
             "/help --------> display help message\n"
-            "/mode --------> change mode between local and remote"
+            "/mode --------> change mode between local and remote\n"
             "/login -------> send a command to a Linux host\n"
             "/logout -----> terminate ssh session\n"
             "/run ---------> run a linux command"

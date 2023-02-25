@@ -1,4 +1,4 @@
-from pebbels import Pebbles
+from pebbles import Pebbles
 
 def reader(file):
     try:
