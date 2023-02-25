@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from subprocess import PIPE, STDOUT, Popen 
 from paramiko import SSHClient, AutoAddPolicy
 from paramiko.ssh_exception import (
@@ -75,4 +76,3 @@ class Tools():
             return output.decode('utf-8')
         else:
             return ''
-    

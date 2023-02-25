@@ -1,6 +1,6 @@
 import logging
 from socket import gethostbyname
-from pb_tools import Tools, SSH_Tools
+from pb_tools import Tools, SSH_Tools, Emoji
 
 from telebot import TeleBot
 from telebot.types import (
@@ -19,9 +19,13 @@ def security_check(method):
         uid = str(message.from_user.id)
         if uid in self.uid_whitelist:
             method(self, message)
-            self.log(message, f'>!< {uid} was ALLOWED')
+            self.log(message, f'>@< {uid} was ALLOWED')
         else:
-            self.bot.reply_to(message, 'Not Allowed!')
+            block_message = (
+                "User is not authorized 🚷\n"
+                "This incident was reported to FBI‼️"
+            )
+            self.bot.reply_to(message, block_message)
             self.log(message, f'>!< {uid} was BLOCKED')
     return wrapper
 
@@ -31,6 +35,7 @@ class Pebbles:
         self.bot = TeleBot(api_key)
         self.tls = Tools()
         self.ssh = SSH_Tools()
+        self.emj = Emoji
         self.pebbles_mode = 'local'
 
         self.uid_whitelist = whitelist
@@ -97,8 +102,10 @@ class Pebbles:
         Function: display hello message and show /help link
         '''
         self.log(message, log='/start')
-        start_message = ("Pebbles, at your service! "
-                        "Please type /help for help")
+        start_message = (
+            "Pebbles, at your service! 🐧\n"
+            "Please type /help for help"
+        )
         self.bot.reply_to(message, start_message)
 
     @security_check
@@ -109,7 +116,7 @@ class Pebbles:
         '''
         self.log(message, log='/help')
         help_message = (
-            "Commands that Pebbles knows:\n"
+            "Commands that Pebbles knows 🎁:\n"
             "/start -------> display start message\n"
             "/help --------> display help message\n"
             "/mode --------> change mode between local and remote\n"
@@ -127,7 +134,7 @@ class Pebbles:
         '''
         self.log(message, log='/logout')
         self.ssh.ssh_disconnect()
-        self.bot.reply_to(message, 'SSH connection terminated')
+        self.bot.reply_to(message, 'SSH connection terminated ⚡️')
 
     @security_check
     def login(self, message):
@@ -267,7 +274,7 @@ class Pebbles:
                     f'Command output: \n{cout}\n')
                 self.bot.send_message(
                     message.from_user.id,
-                    f'Command output: \n{err}')
+                    f'Error output: \n{err}')
             elif cout != '':
                 self.bot.send_message(message.from_user.id, cout)
             elif err != '':
@@ -287,16 +294,16 @@ class Pebbles:
         '''
         if con_result == True:
             self.bot.send_message(
-                chat_id, 'Login Success')
+                chat_id, 'Login Success 🔗')
         elif con_result == 'pass':
             self.bot.send_message(
-                chat_id, 'Login Failed, Wrong Password')
+                chat_id, 'Login Failed, Wrong Password ❌')
         elif con_result == 'port':
             self.bot.send_message(
-                chat_id, 'Login Failed, Wrong Port')
+                chat_id, 'Login Failed, Wrong Port ❌')
         elif con_result == 'time':
             self.bot.send_message(
-                chat_id, 'Login Failed, Connection Timed Out')
+                chat_id, 'Login Failed, Connection Timed Out ❌')
 
     def callback_worker(self, call):
         '''
@@ -316,17 +323,17 @@ class Pebbles:
             self.log(call, 'pressed NO on the keyboard')
             self.bot.send_message(
                 call.message.chat.id,
-                'To start over enter /login again')
+                'To start over enter /login again ♻️')
         elif call.data == 'remote':         
             self.pebbles_mode = 'remote'
             self.bot.send_message(
                 call.message.chat.id,
-                'Pebbles mode: Remote')
+                'Pebbles mode: Remote 🚀')
         elif call.data == 'local':
             self.pebbles_mode = 'local'
             self.bot.send_message(
                 call.message.chat.id,
-                'Pebbles mode: Local')
+                'Pebbles mode: Local 🏡')
 
     def rest(self, message):
         '''
