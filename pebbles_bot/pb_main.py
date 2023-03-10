@@ -21,7 +21,10 @@ class Pebbles:
         logging.basicConfig(
             format="%(asctime)s %(message)s",
             level=logging.INFO,
-            handlers=[logging.FileHandler("pebbles.log"), logging.StreamHandler()],
+            handlers=[
+                logging.FileHandler("pebbles.log"),
+                logging.StreamHandler(),
+            ],
         )
         self.logger = logging.getLogger()
 
@@ -77,7 +80,9 @@ class Pebbles:
         Function: display hello message and show /help link
         """
         self.log(message, log="/start")
-        start_message = "Pebbles, at your service! 🐧\n" "Please type /help for help"
+        start_message = (
+            "Pebbles, at your service! 🐧\n" "Please type /help for help"
+        )
         self.bot.reply_to(message, start_message)
 
     @security_check
@@ -159,7 +164,9 @@ class Pebbles:
             self.log(message, err_message)
         else:
             self.bot.send_message(
-                message.from_user.id, "Enter **username**", parse_mode="markdown"
+                message.from_user.id,
+                "Enter **username**",
+                parse_mode="markdown",
             )
             self.bot.register_next_step_handler(message, self.get_uname)
 
@@ -245,7 +252,9 @@ class Pebbles:
                 self.bot.send_message(
                     message.from_user.id, f"Command output: \n{cout}\n"
                 )
-                self.bot.send_message(message.from_user.id, f"Error output: \n{err}")
+                self.bot.send_message(
+                    message.from_user.id, f"Error output: \n{err}"
+                )
             elif cout != "":
                 self.bot.send_message(message.from_user.id, cout)
             elif err != "":
@@ -268,7 +277,9 @@ class Pebbles:
         elif con_result == "port":
             self.bot.send_message(chat_id, "Login Failed, Wrong Port ❌")
         elif con_result == "time":
-            self.bot.send_message(chat_id, "Login Failed, Connection Timed Out ❌")
+            self.bot.send_message(
+                chat_id, "Login Failed, Connection Timed Out ❌"
+            )
 
     def callback_worker(self, call):
         """
@@ -289,15 +300,20 @@ class Pebbles:
             )
         elif call.data == "remote":
             self.pebbles_mode = "remote"
-            self.bot.send_message(call.message.chat.id, "Pebbles mode: Remote 🚀")
+            self.bot.send_message(
+                call.message.chat.id, "Pebbles mode: Remote 🚀"
+            )
         elif call.data == "local":
             self.pebbles_mode = "local"
-            self.bot.send_message(call.message.chat.id, "Pebbles mode: Local 🏡")
+            self.bot.send_message(
+                call.message.chat.id, "Pebbles mode: Local 🏡"
+            )
 
     def rest(self, message):
         """
         Process input that is not defined
         """
         self.bot.send_message(
-            message.from_user.id, "I do not understand :( \ncall /help for help"
+            message.from_user.id,
+            "I do not understand :( \ncall /help for help",
         )

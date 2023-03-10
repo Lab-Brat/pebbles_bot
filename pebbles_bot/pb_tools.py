@@ -1,6 +1,9 @@
 from subprocess import PIPE, STDOUT, Popen
 from paramiko import SSHClient, AutoAddPolicy
-from paramiko.ssh_exception import AuthenticationException, NoValidConnectionsError
+from paramiko.ssh_exception import (
+    AuthenticationException,
+    NoValidConnectionsError,
+)
 
 
 def security_check(method):
@@ -17,7 +20,8 @@ def security_check(method):
             self.log(message, f">@< {uid} was ALLOWED")
         else:
             block_message = (
-                "User is not authorized 🚷\n" "This incident was reported to FBI‼️"
+                "User is not authorized 🚷\n"
+                "This incident was reported to FBI‼️"
             )
             self.bot.reply_to(message, block_message)
             self.log(message, f">!< {uid} was BLOCKED")
