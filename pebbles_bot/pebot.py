@@ -2,7 +2,7 @@ import yaml
 from pathlib import Path
 from .pb_main import Pebbles
 
-config = f"{str(Path.home())}/pebbles.yaml"
+config = f"{str(Path.home())}/.pebbles/pebbles.yaml"
 
 
 def reader():
@@ -13,6 +13,7 @@ def reader():
         except:
             print(f"Error opening {config}")
     else:
+        Path(f"{str(Path.home())}/.pebbles").mkdir(parents=True, exist_ok=True)
         with open(config, "w") as config_file:
             yaml.dump(
                 {"pebbles": {"api_key": "API_KEY", "whitelist": ["USER_ID"]}},
@@ -27,7 +28,12 @@ def reader():
 
 def main():
     read_yaml = reader()
-    Pebbles(read_yaml["pebbles"]["api_key"], read_yaml["pebbles"]["whitelist"])
+    if read_yaml:
+        Pebbles(
+            read_yaml["pebbles"]["api_key"], read_yaml["pebbles"]["whitelist"]
+        )
+    else:
+        print("Relaunch the bot after editing the configuration file.")
 
 
 if __name__ == "__main__":
