@@ -3,6 +3,28 @@ from paramiko import SSHClient, AutoAddPolicy
 from paramiko.ssh_exception import AuthenticationException, NoValidConnectionsError
 
 
+def security_check(method):
+    """
+    Attempt to find user ID in uid whitelist,
+    allow uid to run command if found,
+    block if not found.
+    """
+
+    def wrapper(self, message):
+        uid = str(message.from_user.id)
+        if uid in self.uid_whitelist:
+            method(self, message)
+            self.log(message, f">@< {uid} was ALLOWED")
+        else:
+            block_message = (
+                "User is not authorized 🚷\n" "This incident was reported to FBI‼️"
+            )
+            self.bot.reply_to(message, block_message)
+            self.log(message, f">!< {uid} was BLOCKED")
+
+    return wrapper
+
+
 class SSH_Tools:
     def __init__(self):
         self.client = SSHClient()

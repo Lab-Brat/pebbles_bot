@@ -1,6 +1,6 @@
 import logging
 from socket import gethostbyname
-from pb_tools import Tools, SSH_Tools, Emoji
+from pb_tools import security_check, Tools, SSH_Tools
 
 from telebot import TeleBot
 from telebot.types import (
@@ -9,34 +9,11 @@ from telebot.types import (
 )
 
 
-def security_check(method):
-    """
-    Attempt to find user ID in uid whitelist,
-    allow uid to run command if found,
-    block if not found.
-    """
-
-    def wrapper(self, message):
-        uid = str(message.from_user.id)
-        if uid in self.uid_whitelist:
-            method(self, message)
-            self.log(message, f">@< {uid} was ALLOWED")
-        else:
-            block_message = (
-                "User is not authorized 🚷\n" "This incident was reported to FBI‼️"
-            )
-            self.bot.reply_to(message, block_message)
-            self.log(message, f">!< {uid} was BLOCKED")
-
-    return wrapper
-
-
 class Pebbles:
     def __init__(self, api_key, whitelist):
         self.bot = TeleBot(api_key)
         self.tls = Tools()
         self.ssh = SSH_Tools()
-        self.emj = Emoji
         self.pebbles_mode = "local"
 
         self.uid_whitelist = whitelist
