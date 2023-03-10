@@ -40,29 +40,29 @@ So yeah, I'd say it is pretty secure :)
 
 
 ## Deployment
-- Clone the repository and navigate to it
+- Clone the repository, navigate to it and install with pip
 ```bash
-git clone https://github.com/Lab-Brat/pebbles_bot.git && cd pebbles_bot
+git clone https://github.com/Lab-Brat/pebbles_bot.git
 cd pebbles_bot
+python -m pip install .
 ```
-- Create a virtual environment and install dependencies
-```bash
-python -m venv venv
-source venv/bin/activate
-python -m pip install pytelegrambotapi paramiko
+
+- Ask [BotFather](https://core.telegram.org/bots#6-botfather) to create a bot, then save it's API key
+
+- Create a configuration file and paste your API key and authorized user IDs to it
+```yaml
+---
+pebbles:
+  api_key: '....................'
+
+  whitelist:
+    - '0123456789'
+    - '3141592653' 
 ```
-- Ask [BotFather](https://core.telegram.org/bots#6-botfather) to create a bot, then save it's API hash
-```bash
-bot_api=<API_HASH>
-echo $bot_api >> pebbles_api
-```
-- Authorize users to use the bot by creating a whitelist file with user IDs.
-```bash
-echo "<id1>\n<id2>" > pebbles_whitelist
-```
+
 - Run Pebbles
 ```bash
-python main.py
+pebot
 ```
 
 ## Command Guide
