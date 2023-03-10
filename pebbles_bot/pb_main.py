@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 from socket import gethostbyname
 from .pb_tools import security_check, Tools, SSH_Tools
 
@@ -22,7 +23,7 @@ class Pebbles:
             format="%(asctime)s %(message)s",
             level=logging.INFO,
             handlers=[
-                logging.FileHandler("pebbles.log"),
+                logging.FileHandler(f"{str(Path.home())}/pebbles.log"),
                 logging.StreamHandler(),
             ],
         )
