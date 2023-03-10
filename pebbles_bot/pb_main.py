@@ -61,7 +61,16 @@ class Pebbles:
         def _callback_worker(call):
             self.callback_worker(call)
 
+        self.start_bot()
+
+    def start_bot(self):
+        """
+        Start the bot and print a message.
+        """
+        self.logger.info("Pebbles is awakening...")
+        self.logger.info("Awaiting commands")
         self.bot.polling(interval=0)
+        self.logger.info("Pebbles is entering hibernation...")
 
     def log(self, info, log=""):
         """
