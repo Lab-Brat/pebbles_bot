@@ -1,6 +1,6 @@
 import yaml
 from pathlib import Path
-from pebbles import Pebbles
+from .pb_main import Pebbles
 
 config = f"{str(Path.home())}/pebbles.yaml"
 
@@ -25,6 +25,10 @@ def reader():
         )
 
 
-if __name__ == "__main__":
+def main():
     read_yaml = reader()
     Pebbles(read_yaml["pebbles"]["api_key"], read_yaml["pebbles"]["whitelist"])
+
+
+if __name__ == "__main__":
+    main()

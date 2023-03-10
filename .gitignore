@@ -1,3 +1,5 @@
+build/
 venv/
-__pycache__
+pebbles_bot.egg-info/
+__pycache__/
 pebbles.log

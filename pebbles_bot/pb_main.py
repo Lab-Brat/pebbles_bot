@@ -1,6 +1,6 @@
 import logging
 from socket import gethostbyname
-from pb_tools import security_check, Tools, SSH_Tools
+from .pb_tools import security_check, Tools, SSH_Tools
 
 from telebot import TeleBot
 from telebot.types import (
