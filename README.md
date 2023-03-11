@@ -1,9 +1,16 @@
 # pebbles_bot
 
 ## Table of content
-- [Introduction](#introduction)
-- [Deployment](#deployment)
-- [Command Guide](#command-guide)
+- [pebbles\_bot](#pebbles_bot)
+  - [Table of content](#table-of-content)
+  - [Introduction](#introduction)
+      - [What It Can Do Now](#what-it-can-do-now)
+      - [What It Will Do In The Future](#what-it-will-do-in-the-future)
+      - [Is it secure to run a public bot with direct access to a server?](#is-it-secure-to-run-a-public-bot-with-direct-access-to-a-server)
+  - [Deployment](#deployment)
+  - [Command Guide](#command-guide)
+  - [Prefix](#prefix)
+      - [Running Pebbles in a Docker container](#running-pebbles-in-a-docker-container)
 
 ## Introduction
 Pebbles is a bot which allows users to run shell commands on their Linux servers from Telegram.  
@@ -40,13 +47,6 @@ So yeah, I'd say it is pretty secure :)
 
 
 ## Deployment
-- Clone the repository, navigate to it and install with pip
-```bash
-git clone https://github.com/Lab-Brat/pebbles_bot.git
-cd pebbles_bot
-python -m pip install .
-```
-
 - Ask [BotFather](https://core.telegram.org/bots#6-botfather) to create a bot, then save it's API key
 
 - Create a configuration file and paste your API key and authorized user IDs to it
@@ -59,6 +59,12 @@ pebbles:
     - '0123456789'
     - '3141592653' 
 ```
+
+- Install the bot with pip
+```bash
+python -m pip install pebbles_bot
+```
+**Note** Alternatively the bot can be ran in a container, see [Prefix](#prefix)
 
 - Run Pebbles
 ```bash
@@ -81,3 +87,25 @@ pebot
     select `Yes` to establish a connection, `No` to cancel.
 - `/logout` -> to terminate the SSH connection
 - `/run` -> run a shell command, where it runs depends on `/mode`. After command call user will be prompted to enter a command, stdout or stderr will be returned
+
+
+## Prefix
+#### Running Pebbles in a Docker container
+**Note** This is not the recommended installation method, more like a fun alternative :)
+
+Create a `$HOME/.pebbles/pebbles.yaml` configuration file first 
+(`.pebbles` will be mounted to the container) and run:
+```bash
+docker run -d --name pebot \
+              --volume $HOME/.pebbles:/root/.pebbles \
+              labbratnet/pebbles:0.1.1
+```
+
+Alternatively, there is a Docker image for this bot in `Docker/Dockerfile` 
+which can be customized. To use it, navigrate to `Docker` and run:
+```bash
+docker build -t pebbles .
+docker run -d --name pebot \
+              --volume $HOME/.pebbles:/root/.pebbles \
+              pebbles
+```
