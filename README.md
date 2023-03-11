@@ -1,16 +1,14 @@
 # pebbles_bot
 
 ## Table of content
-- [pebbles\_bot](#pebbles_bot)
-  - [Table of content](#table-of-content)
-  - [Introduction](#introduction)
-      - [What It Can Do Now](#what-it-can-do-now)
-      - [What It Will Do In The Future](#what-it-will-do-in-the-future)
-      - [Is it secure to run a public bot with direct access to a server?](#is-it-secure-to-run-a-public-bot-with-direct-access-to-a-server)
-  - [Deployment](#deployment)
-  - [Command Guide](#command-guide)
-  - [Prefix](#prefix)
-      - [Running Pebbles in a Docker container](#running-pebbles-in-a-docker-container)
+- [Introduction](#introduction)
+    - [What It Can Do Now](#what-it-can-do-now)
+    - [What It Will Do In The Future](#what-it-will-do-in-the-future)
+    - [Is it secure to run a public bot with direct access to a server?](#is-it-secure-to-run-a-public-bot-with-direct-access-to-a-server)
+- [Deployment](#deployment)
+- [Command Guide](#command-guide)
+- [Prefix](#prefix)
+    - [Running Pebbles in a Docker container](#running-pebbles-in-a-docker-container)
 
 ## Introduction
 Pebbles is a bot which allows users to run shell commands on their Linux servers from Telegram.  
