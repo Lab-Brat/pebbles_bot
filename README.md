@@ -1,11 +1,11 @@
-# pebbles_bot
-
 ## Table of content
+- [Table of content](#table-of-content)
 - [Introduction](#introduction)
     - [What It Can Do Now](#what-it-can-do-now)
     - [What It Will Do In The Future](#what-it-will-do-in-the-future)
     - [Is it secure to run a public bot with direct access to a server?](#is-it-secure-to-run-a-public-bot-with-direct-access-to-a-server)
 - [Deployment](#deployment)
+- [Run Pebbles](#run-pebbles)
 - [Command Guide](#command-guide)
 - [Prefix](#prefix)
     - [Running Pebbles in a Docker container](#running-pebbles-in-a-docker-container)
@@ -20,11 +20,12 @@ save its API hash to `./pebbles_api`, and just run it!
 At this stage Pebbles is not very sophisticated, it can:
 - Run commands locally.
 - Establish a SSH connection to another host and run commands there.
+- Send a notification by piping stdout.
 
 #### What It Will Do In The Future
-- Support more built-in commands to do various tasks.
-- Support public key authentication for SSH connections.
-- Send information from the server to Telegram (upon completion of a script, for example).
+- More built-in commands to do various tasks.
+- Public key authentication for SSH connections.
+- Add support for custom plugins, like monitoring etc.
 
 #### Is it secure to run a public bot with direct access to a server?
 The bot's channel itself is encrypted and secure by default. 
@@ -64,9 +65,16 @@ python -m pip install pebbles_bot
 ```
 **Note** Alternatively the bot can be ran in a container, see [Prefix](#prefix)
 
-- Run Pebbles
+
+## Run Pebbles
+- Run in SSH proxy mode:
 ```bash
 pebot
+```
+
+- Send notifications with it:
+```bash
+echo 'Testing Notifications!' | pebot --notify
 ```
 
 ## Command Guide
