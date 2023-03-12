@@ -4,6 +4,7 @@ from socket import gethostbyname
 from .pb_tools import security_check, Tools, SSH_Tools
 
 from telebot import TeleBot
+from telebot.apihelper import ApiTelegramException
 from telebot.types import (
     InlineKeyboardMarkup as ik_markup,
     InlineKeyboardButton as ik_button,
@@ -74,7 +75,10 @@ class Pebbles:
         """
         self.logger.info("Pebbles is awakening...")
         self.logger.info("Awaiting commands")
-        self.bot.polling(interval=0)
+        try:
+            self.bot.polling(interval=0)
+        except ApiTelegramException:
+            self.logger.info("Unable to start Pebbles, check your API key")
         self.logger.info("Pebbles is entering hibernation...")
 
     def log(self, info, log=""):
