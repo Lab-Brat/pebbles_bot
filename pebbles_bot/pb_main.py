@@ -11,7 +11,7 @@ from telebot.types import (
 
 
 class Pebbles:
-    def __init__(self, api_key, whitelist):
+    def __init__(self, api_key, whitelist, notify=False):
         self.bot = TeleBot(api_key)
         self.tls = Tools()
         self.ssh = SSH_Tools()
@@ -63,7 +63,10 @@ class Pebbles:
         def _callback_worker(call):
             self.callback_worker(call)
 
-        self.start_bot()
+        if notify:
+            self.send_notification(notify)
+        else:
+            self.start_bot()
 
     def start_bot(self):
         """
@@ -84,6 +87,15 @@ class Pebbles:
             self.logger.info(f"[{uid} called {log} command]")
         else:
             self.logger.info(f"[{uid} {log}]")
+
+    def send_notification(self, text):
+        """
+        Send a notification to the user.
+        """
+        for user_id in self.uid_whitelist:
+            intro = "📢 Notification from Pebbles 📢"
+            self.bot.send_message(user_id, intro)
+            self.bot.send_message(user_id, text)
 
     @security_check
     def start(self, message):

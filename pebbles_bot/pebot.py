@@ -1,3 +1,4 @@
+import sys
 import yaml
 from pathlib import Path
 from .pb_main import Pebbles
@@ -29,8 +30,14 @@ def reader():
 def main():
     read_yaml = reader()
     if read_yaml:
+        if len(sys.argv) == 1:
+            notify = False
+        elif sys.argv[1] == "--notify":
+            notify = sys.stdin.read()
         Pebbles(
-            read_yaml["pebbles"]["api_key"], read_yaml["pebbles"]["whitelist"]
+            read_yaml["pebbles"]["api_key"],
+            read_yaml["pebbles"]["whitelist"],
+            notify=notify,
         )
     else:
         print("Relaunch the bot after editing the configuration file.")
