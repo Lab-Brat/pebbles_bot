@@ -1,5 +1,6 @@
+import os
 from subprocess import PIPE, STDOUT, Popen
-from paramiko import SSHClient, AutoAddPolicy
+from paramiko import SSHConfig, SSHClient, AutoAddPolicy
 from paramiko.ssh_exception import (
     AuthenticationException,
     NoValidConnectionsError,
@@ -31,22 +32,44 @@ def security_check(method):
 
 class SSH_Tools:
     def __init__(self):
+        self.config = SSHConfig()
+        self.read_ssh_config()
+
         self.client = SSHClient()
         self.client.set_missing_host_key_policy(AutoAddPolicy())
 
-    def ssh_connect(self, host, port, uname, pwd):
+    def read_ssh_config(self):
+        """
+        Read SSH config file and return a dictionary
+        """
+        ssh_config_file = os.path.expanduser("~/.ssh/config")
+        with open(ssh_config_file) as f:
+            self.config.parse(f)
+
+    def ssh_connect(self, host):
         """
         Establish a SSH connection
         """
         try:
-            self.client.connect(host, port=port, username=uname, password=pwd)
-            return True
+            host_config = self.config.lookup(host)
+            if "identityfile" not in host_config:
+                return "nokey"
+            else:
+                self.client.connect(
+                    host_config["hostname"],
+                    username=host_config.get("user"),
+                    port=host_config.get("port"),
+                    key_filename=host_config.get("identityfile"),
+                )
+                return True
         except AuthenticationException:
             return "pass"
         except NoValidConnectionsError:
             return "port"
         except TimeoutError:
             return "time"
+        except:
+            return "Could not find host in SSH config"
 
     def ssh_disconnect(self):
         """
