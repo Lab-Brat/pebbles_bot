@@ -1,8 +1,29 @@
+import os
 import sys
 import yaml
-import os
 from pathlib import Path
 from .pb_main import Pebbles
+
+
+def config_reader():
+    """
+    Reads the config file and returns a dictionary
+    """
+    config = os.environ.get(
+        "PEBBLES_CONFIG", f"{str(Path.home())}/.pebbles/pebbles.yaml"
+    )
+    print(config)
+
+    if Path(config).is_file():
+        try:
+            with open(config, "r") as config_file:
+                return yaml.safe_load(config_file)
+        except:
+            print(f"Error opening {config}")
+            return None
+    else:
+        print(f"Config file {config} not found")
+        return None
 
 
 def main():
@@ -21,6 +42,10 @@ def main():
         notify = False
     elif "--notify" in sys.argv:
         notify = sys.stdin.read()
+
+    pebbles_config = config_reader()
+    if pebbles_config:
+        whitelist_ids = pebbles_config["whitelist_ids"]
 
     Pebbles(
         api_key=api_key,
