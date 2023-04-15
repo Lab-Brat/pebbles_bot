@@ -12,7 +12,6 @@ def config_reader():
     config = os.environ.get(
         "PEBBLES_CONFIG", f"{str(Path.home())}/pebbles.yaml"
     )
-    print(config)
 
     if Path(config).is_file():
         try:
