@@ -24,9 +24,7 @@ class Pebbles:
             format="%(asctime)s %(message)s",
             level=logging.INFO,
             handlers=[
-                logging.FileHandler(
-                    f"{str(Path.home())}/.pebbles/pebbles.log"
-                ),
+                logging.FileHandler(f"{str(Path.home())}/.pebbles.log"),
                 logging.StreamHandler(),
             ],
         )

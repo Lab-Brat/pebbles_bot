@@ -10,7 +10,7 @@ def config_reader():
     Reads the config file and returns a dictionary
     """
     config = os.environ.get(
-        "PEBBLES_CONFIG", f"{str(Path.home())}/.pebbles/pebbles.yaml"
+        "PEBBLES_CONFIG", f"{str(Path.home())}/pebbles.yaml"
     )
     print(config)
 
