@@ -1,46 +1,32 @@
 import sys
 import yaml
+import os
 from pathlib import Path
 from .pb_main import Pebbles
 
-config = f"{str(Path.home())}/.pebbles/pebbles.yaml"
-
-
-def reader():
-    if Path(config).is_file():
-        try:
-            with open(config, "r") as config_file:
-                return yaml.safe_load(config_file)
-        except:
-            print(f"Error opening {config}")
-    else:
-        Path(f"{str(Path.home())}/.pebbles").mkdir(parents=True, exist_ok=True)
-        with open(config, "w") as config_file:
-            yaml.dump(
-                {"pebbles": {"api_key": "API_KEY", "whitelist": ["USER_ID"]}},
-                config_file,
-                default_flow_style=False,
-            )
-        print(
-            f"Configuration file template created at {config}\n"
-            f"please edit it and consult README for details"
-        )
-
 
 def main():
-    read_yaml = reader()
-    if read_yaml:
-        if len(sys.argv) == 1:
-            notify = False
-        elif sys.argv[1] == "--notify":
-            notify = sys.stdin.read()
-        Pebbles(
-            read_yaml["pebbles"]["api_key"],
-            read_yaml["pebbles"]["whitelist"],
-            notify=notify,
-        )
-    else:
-        print("Relaunch the bot after editing the configuration file.")
+    api_key = os.environ.get("PEBBLES_API_KEY")
+    whitelist_ids = os.environ.get("PEBBLES_USER_WHITELIST")
+
+    if not api_key:
+        print("Pebbles API key not found")
+        sys.exit(0)
+
+    if not whitelist_ids:
+        print("Pebbles user whitelist not found")
+        sys.exit(0)
+
+    if len(sys.argv) == 1:
+        notify = False
+    elif "--notify" in sys.argv:
+        notify = sys.stdin.read()
+
+    Pebbles(
+        api_key=api_key,
+        whitelist=whitelist_ids.split(","),
+        notify=notify,
+    )
 
 
 if __name__ == "__main__":
