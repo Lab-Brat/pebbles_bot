@@ -3,4 +3,5 @@ dist
 venv/
 pebbles_bot.egg-info/
 __pycache__/
+.vscode/
 pebbles.log
