@@ -1,6 +1,5 @@
 import logging
 from pathlib import Path
-from socket import gethostbyname
 from .pb_tools import security_check, Tools, SSH_Tools
 
 from telebot import TeleBot
@@ -148,57 +147,21 @@ class Pebbles:
         self.log(message, log="/login")
         self.bot.send_message(
             message.from_user.id,
-            "Enter **IP address**  [format -> IP:port]",
+            "Enter *hostname*\n(as defined in `~/.ssh/config`)",
             parse_mode="markdown",
         )
-        self.bot.register_next_step_handler(message, self.get_ip)
+        self.bot.register_next_step_handler(message, self.get_hostname)
 
-    def _valid_ip_hn(self, ip):
+    def get_hostname(self, message):
         """
-        Check if input is a valid IP address,
-        or try to resolve it in case of a hostname.
-        Return a boolean.
+        Takes hostname (as defined in ~/.ssh/config),
         """
-        try:
-            gethostbyname(ip)
-            return True
-        except:
-            return False
-
-    def _parse_ip(self, message):
-        """
-        Takes <ip>:<port> as input,
-        validates IP and reads it and port into a dict.
-        If port is missing, default SSH port is assigned.
-        """
-        msg_split = message.text.split(":")
-        host = msg_split[0]
-        port = "22" if len(msg_split) == 1 else msg_split[1]
-        resolved = True if self._valid_ip_hn(host) else False
-        return {"host": host, "port": port, "resolved": resolved}
-
-    def get_ip(self, message):
-        """
-        Takes IP address and port of the remote host as input,
-        redirects to get_uname
-        """
-        self.log(message, "called get_ip method")
-        self.host = self._parse_ip(message)
-        # if not self.host["resolved"]:
-        #     err_message = f"{self.host['host']} cannot be resolved"
-        #     self.bot.send_message(message.from_user.id, err_message)
-        #     self.log(message, err_message)
-        # else:
-        #     self.bot.send_message(
-        #         message.from_user.id,
-        #         "Enter **username**",
-        #         parse_mode="markdown",
-        #     )
-        #     self.bot.register_next_step_handler(message, self.get_uname)
+        self.log(message, "called get_hostname method")
+        self.host = message.text
         keyboard = ik_markup()
         keyboard.add(ik_button(text="yes", callback_data="yes"))
         keyboard.add(ik_button(text="no", callback_data="no"))
-        question = f"Establish SSH connection to {self.host['host']}"
+        question = f"Establish SSH connection to {self.host}"
 
         self.bot.send_message(
             message.from_user.id,
@@ -206,42 +169,6 @@ class Pebbles:
             reply_markup=keyboard,
             parse_mode="markdown",
         )
-
-    # def get_uname(self, message):
-    #     """
-    #     Takes username of the remote host as input,
-    #     redirects to get_pass
-    #     """
-    #     self.log(message, "called get_uname method")
-    #     self.uname = message.text
-    #     self.bot.send_message(
-    #         message.from_user.id, "Enter **password**", parse_mode="markdown"
-    #     )
-    #     self.bot.register_next_step_handler(message, self.get_pass)
-
-    # def get_pass(self, message):
-    #     """
-    #     Takes remote host's password as input,
-    #     displays confirmation message
-    #     """
-    #     self.log(message, "called get_pass method")
-    #     self.paswd = message.text
-
-    #     keyboard = ik_markup()
-    #     keyboard.add(ik_button(text="yes", callback_data="yes"))
-    #     keyboard.add(ik_button(text="no", callback_data="no"))
-    #     question = (
-    #         f"Establish SSH connection to "
-    #         f"{self.host['host']}:{self.host['port']} "
-    #         f"with user `{self.uname}`?"
-    #     )
-
-    #     self.bot.send_message(
-    #         message.from_user.id,
-    #         text=question,
-    #         reply_markup=keyboard,
-    #         parse_mode="markdown",
-    #     )
 
     @security_check
     def run(self, message):
@@ -309,16 +236,18 @@ class Pebbles:
         """
         if con_result == True:
             self.bot.send_message(chat_id, "Login Success 🔗")
-        elif con_result == "nokey":
+        elif con_result == "key_not_found":
             self.bot.send_message(chat_id, "Login Failed, No Key In Config ❌")
-        elif con_result == "pass":
-            self.bot.send_message(chat_id, "Login Failed, Wrong Password ❌")
-        elif con_result == "port":
-            self.bot.send_message(chat_id, "Login Failed, Wrong Port ❌")
-        elif con_result == "time":
+        elif con_result == "timeout":
             self.bot.send_message(
                 chat_id, "Login Failed, Connection Timed Out ❌"
             )
+        elif con_result == "config_not_found":
+            self.bot.send_message(
+                chat_id, "Login Failed, ~/.ssh/config File Not Found ❌"
+            )
+        else:
+            self.bot.send_message(chat_id, "Login Failed, Reason Unclear ❌")
 
     def callback_worker(self, call):
         """
@@ -328,7 +257,7 @@ class Pebbles:
         """
         if call.data == "yes":
             self.log(call, "pressed YES on the keyboard")
-            con_result = self.ssh.ssh_connect(self.host["host"])
+            con_result = self.ssh.ssh_connect(self.host)
             self._connect(call.message.chat.id, con_result)
         elif call.data == "no":
             self.log(call, "pressed NO on the keyboard")

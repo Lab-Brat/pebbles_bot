@@ -53,7 +53,7 @@ class SSH_Tools:
         try:
             host_config = self.config.lookup(host)
             if "identityfile" not in host_config:
-                return "nokey"
+                return "key_not_found"
             else:
                 self.client.connect(
                     host_config["hostname"],
@@ -62,14 +62,10 @@ class SSH_Tools:
                     key_filename=host_config.get("identityfile"),
                 )
                 return True
-        except AuthenticationException:
-            return "pass"
-        except NoValidConnectionsError:
-            return "port"
         except TimeoutError:
-            return "time"
+            return "timeout"
         except:
-            return "Could not find host in SSH config"
+            return "config_not_found"
 
     def ssh_disconnect(self):
         """
