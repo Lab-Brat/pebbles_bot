@@ -11,7 +11,9 @@ from telebot.types import (
 
 
 class Pebbles:
-    def __init__(self, api_key, whitelist, notify=False):
+    def __init__(
+        self, api_key: str, whitelist: list[str], notify: bool = False
+    ):
         self.bot = TeleBot(api_key)
         self.tls = Tools()
         self.ssh = SSH_Tools()
