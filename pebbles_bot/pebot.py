@@ -37,9 +37,9 @@ def main():
         print("Pebbles user whitelist not found")
         sys.exit(0)
 
-    if len(sys.argv) == 1:
-        notify = False
-    elif "--notify" in sys.argv:
+    notify = "--notify" in sys.argv
+    if notify:
+        sys.argv.remove("--notify")
         notify = sys.stdin.read()
 
     pebbles_config = config_reader()
