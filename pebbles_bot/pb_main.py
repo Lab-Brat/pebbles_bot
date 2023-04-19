@@ -84,7 +84,9 @@ class Pebbles:
         try:
             self.bot.polling(interval=0)
         except ApiTelegramException:
-            self.logger.info("Unable to start Pebbles, check your API key")
+            self.logger.exception(
+                "Unable to start Pebbles, check your API key"
+            )
         self.logger.info("Pebbles is entering hibernation...")
 
     def log(self, info, log=""):
@@ -236,6 +238,7 @@ class Pebbles:
                 self.bot.send_message(message.from_user.id, "No Output")
         except AttributeError:
             err_msg = "There is no active SSH session"
+            self.logger.exception(err_msg)
             self.bot.send_message(message.from_user.id, err_msg)
 
     def _connect(self, chat_id, con_result):
