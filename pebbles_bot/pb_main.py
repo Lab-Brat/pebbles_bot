@@ -29,6 +29,18 @@ class Pebbles:
         )
         self.logger = logging.getLogger()
 
+        self.register_command_handlers()
+
+        if notify:
+            self.send_notification(notify)
+        else:
+            self.start_bot()
+
+    def register_command_handlers(self):
+        """
+        Register command handlers for the bot.
+        """
+
         @self.bot.message_handler(commands=["start"])
         def _start(message):
             self.start(message)
@@ -60,11 +72,6 @@ class Pebbles:
         @self.bot.callback_query_handler(func=lambda call: True)
         def _callback_worker(call):
             self.callback_worker(call)
-
-        if notify:
-            self.send_notification(notify)
-        else:
-            self.start_bot()
 
     def start_bot(self):
         """
