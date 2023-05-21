@@ -1,6 +1,7 @@
 import os
 import sys
 import yaml
+import argparse
 from pathlib import Path
 from .pb_main import Pebbles
 
@@ -26,6 +27,10 @@ def config_reader():
 
 
 def main():
+    parser = argparse.ArgumentParser(description="Run Pebbles.")
+    parser.add_argument('--notify', action='store_true', help='Notification message to send')
+    args = parser.parse_args()
+
     api_key = os.environ.get("PEBBLES_API_KEY")
     whitelist_ids = os.environ.get("PEBBLES_USER_WHITELIST")
 
@@ -37,14 +42,11 @@ def main():
         print("Pebbles user whitelist not found")
         sys.exit(0)
 
-    notify = "--notify" in sys.argv
-    if notify:
-        sys.argv.remove("--notify")
-        notify = sys.stdin.read()
-
     pebbles_config = config_reader()
     if pebbles_config:
         whitelist_ids = pebbles_config["whitelist_ids"]
+
+    notify = sys.stdin.read() if args.notify else None
 
     Pebbles(
         api_key=api_key,
@@ -55,3 +57,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
