@@ -16,7 +16,10 @@ Pebbles is a bot which allows users to run shell commands on their Linux servers
 There are only 3 steps to get it up and running:
 1. Ask [BotFather](https://core.telegram.org/bots#6-botfather) to create a bot and save its API key.
 2. Install the bot on the server where you wish to run commands using Python pip.
-3. Configure environment variables and run it!
+3. Configure environment variables and run it!  
+
+More about the usage of Pebbles can be found on my [blog post](https://labbrat.net/blog/pebbles_bot/).
+
 
 #### What It Can Do Now
 At this stage Pebbles is not very sophisticated, it can:
