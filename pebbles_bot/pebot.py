@@ -28,7 +28,9 @@ def config_reader():
 
 def main():
     parser = argparse.ArgumentParser(description="Run Pebbles.")
-    parser.add_argument('--notify', action='store_true', help='Notification message to send')
+    parser.add_argument(
+        "--notify", action="store_true", help="Notification message to send"
+    )
     args = parser.parse_args()
 
     api_key = os.environ.get("PEBBLES_API_KEY")
@@ -57,5 +59,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-

@@ -84,9 +84,7 @@ class Pebbles:
         try:
             self.bot.polling(interval=0)
         except ApiTelegramException:
-            self.logger.exception(
-                "Unable to start Pebbles, check your API key"
-            )
+            self.logger.exception("Unable to start Pebbles, check your API key")
         self.logger.info("Pebbles is entering hibernation...")
 
     def log(self, info, log=""):
@@ -283,9 +281,7 @@ class Pebbles:
             )
         elif call.data == "local":
             self.pebbles_mode = "local"
-            self.bot.send_message(
-                call.message.chat.id, "Pebbles mode: Local 🏡"
-            )
+            self.bot.send_message(call.message.chat.id, "Pebbles mode: Local 🏡")
 
     def rest(self, message):
         """
