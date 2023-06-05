@@ -40,12 +40,11 @@ class SSH_Tools:
         """
         ssh_config_file = os.path.expanduser("~/.ssh/config")
         if not os.path.exists(ssh_config_file):
-            with open(ssh_config_file, 'w'): pass
+            with open(ssh_config_file, 'w'): 
+                print(f"Empty SSH config created at {ssh_config_file}")
 
         with open(ssh_config_file) as conf:
             self.config.parse(conf)
-
-        print(self.config)
 
     def ssh_connect(self, host):
         """
