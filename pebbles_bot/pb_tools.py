@@ -1,10 +1,6 @@
 import os
 from subprocess import PIPE, STDOUT, Popen
 from paramiko import SSHConfig, SSHClient, AutoAddPolicy
-from paramiko.ssh_exception import (
-    AuthenticationException,
-    NoValidConnectionsError,
-)
 
 
 def security_check(method):
@@ -43,8 +39,13 @@ class SSH_Tools:
         Read SSH config file and return a dictionary
         """
         ssh_config_file = os.path.expanduser("~/.ssh/config")
-        with open(ssh_config_file) as f:
-            self.config.parse(f)
+        if not os.path.exists(ssh_config_file):
+            with open(ssh_config_file, 'w'): pass
+
+        with open(ssh_config_file) as conf:
+            self.config.parse(conf)
+
+        print(self.config)
 
     def ssh_connect(self, host):
         """
